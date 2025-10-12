@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
+import { Loader2 } from "lucide-react";
 
 export function SignupForm({ className, ...props }: React.ComponentProps<"form">) {
   const router = useRouter();
@@ -65,7 +66,12 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"form">
   }
 
   return (
-    <form className={cn("flex flex-col gap-6", className)} onSubmit={handleSubmit} {...props}>
+    <form
+      className={cn("flex flex-col gap-6", className)}
+      onSubmit={handleSubmit}
+      aria-busy={loading}
+      {...props}
+    >
       <FieldGroup>
         <div className="flex flex-col items-center gap-1 text-center">
           <h1 className="text-2xl font-bold">Create your account</h1>
@@ -82,6 +88,7 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"form">
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            disabled={loading}
           />
           <FieldDescription>
             We&apos;ll use this to contact you. We will not share your email
@@ -97,6 +104,7 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"form">
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
+            disabled={loading}
           />
           <FieldDescription>Please enter your full name.</FieldDescription>
         </Field>
@@ -108,6 +116,7 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"form">
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            disabled={loading}
           />
           <FieldDescription>
             Must be at least 8 characters long.
@@ -121,6 +130,7 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"form">
             required
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
+            disabled={loading}
           />
           <FieldDescription>Please confirm your password.</FieldDescription>
         </Field>
@@ -129,7 +139,14 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"form">
         )}
         <Field>
           <Button type="submit" disabled={loading}>
-            {loading ? "Creating..." : "Create Account"}
+            {loading ? (
+              <span className="inline-flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Creating...
+              </span>
+            ) : (
+              "Create Account"
+            )}
           </Button>
         </Field>
       </FieldGroup>
