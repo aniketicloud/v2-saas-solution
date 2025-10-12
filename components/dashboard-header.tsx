@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -11,8 +13,21 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Bell, Settings } from "lucide-react";
 import { mockUser, mockOrganization } from "@/lib/mock-data";
 import { Badge } from "@/components/ui/badge";
+import { useRouter } from "next/navigation";
+import { signOut } from "@/lib/auth-client";
 
 export function DashboardHeader() {
+  const router = useRouter();
+
+  async function handleLogout() {
+    try {
+      await signOut({
+        // optionally pass fetchOptions to redirect on server, but we'll client-redirect
+      });
+    } finally {
+      router.push("/login");
+    }
+  }
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex h-16 items-center px-8">
@@ -73,7 +88,10 @@ export function DashboardHeader() {
               <DropdownMenuItem>Profile</DropdownMenuItem>
               <DropdownMenuItem>Billing</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive">
+              <DropdownMenuItem
+                onClick={handleLogout}
+                className="text-destructive cursor-pointer"
+              >
                 Log out
               </DropdownMenuItem>
             </DropdownMenuContent>

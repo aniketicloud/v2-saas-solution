@@ -14,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 import { Loader2 } from "lucide-react";
+import Link from "next/link";
 
 export function SignupForm({ className, ...props }: React.ComponentProps<"form">) {
   const router = useRouter();
@@ -149,6 +150,12 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"form">
             )}
           </Button>
         </Field>
+        <FieldDescription className="text-center">
+          Already have an account?{" "}
+          <Link href="/login" className="underline underline-offset-4">
+            Sign in
+          </Link>
+        </FieldDescription>
       </FieldGroup>
     </form>
   );
