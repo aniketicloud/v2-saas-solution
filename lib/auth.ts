@@ -10,5 +10,12 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
-  plugins: [admin(), organization()],
+  plugins: [
+    admin(),
+    organization({
+      allowUserToCreateOrganization: async (user) => {
+        return user.role === "admin"; // Only admins can create orgs. The create org UI is hidden for non-admins.
+      },
+    }),
+  ],
 });
