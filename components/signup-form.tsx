@@ -16,7 +16,10 @@ import { authClient } from "@/lib/auth-client";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 
-export function SignupForm({ className, ...props }: React.ComponentProps<"form">) {
+export function SignupForm({
+  className,
+  ...props
+}: React.ComponentProps<"form">) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -41,11 +44,18 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"form">
     setLoading(true);
     try {
       // Call Better Auth client signUp.email
-      const { data, error: signUpError } = await authClient.signUp.email({
+      // const { data, error: signUpError } = await authClient.signUp.email({
+      //   email,
+      //   name,
+      //   password,
+      //   // any other fields can be passed here if needed
+      // });
+
+      // create users only through admin endpoint for now
+      const { data, error: signUpError } = await authClient.admin.createUser({
         email,
         name,
         password,
-        // any other fields can be passed here if needed
       });
 
       if (signUpError) {
