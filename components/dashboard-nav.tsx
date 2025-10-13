@@ -8,6 +8,7 @@ import {
   Users,
   UserCheck,
   Ticket,
+  Building,
   Building2,
   Shield,
   CreditCard,
@@ -36,6 +37,11 @@ const navItems = [
     title: "Users",
     href: "/dashboard/users",
     icon: Users,
+  },
+  {
+    title: "Organizations",
+    href: "/dashboard/organizations",
+    icon: Building,
   },
   {
     title: "Offices",
