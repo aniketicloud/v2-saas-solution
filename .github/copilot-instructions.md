@@ -69,38 +69,213 @@ Three specialized nav components match the routing structure:
 - `DashboardNav` - User dashboard sidebar with module links
 - `OrgNav` - Organization-specific navigation
 
-### Form Patterns
-Client components use authClient methods:
-```tsx
-"use client";
-import { authClient } from "@/lib/auth-client";
+### Form Patterns (React Hook Form + Zod v4)
 
-// Sign in
-const { data, error } = await authClient.signIn.email({ 
-  email, 
-  password, 
-  rememberMe, // optional, defaults to true
-  callbackURL: "/dashboard" // optional redirect
-});
+**IMPORTANT**: Always use React Hook Form with Zod v4 for form validation. This provides type safety, better UX, and security through dual validation.
 
-// Sign up
-const { data, error } = await authClient.signUp.email({
-  name,
-  email,
-  password,
-  callbackURL: "/dashboard"
-});
-
-// Sign out
-await authClient.signOut();
+#### Required Dependencies
+```bash
+pnpm add react-hook-form zod@beta @hookform/resolvers
 ```
 
-Use `Field`, `FieldLabel`, `FieldDescription` from `@/components/ui/field` for consistent form styling.
+#### Schema-First Approach
+**Always create a separate `schema.ts` file** for form validation schemas:
 
-**Error Handling**:
-- Check `error` object for sign-in/sign-up failures
-- Status 403 typically means email verification required
-- Use callbacks: `onError`, `onSuccess` for custom handling
+```tsx
+// schema.ts - Shared validation schema
+import { z } from "zod";
+
+export const organizationSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(1, "Organization name is required")
+    .min(3, "Organization name must be at least 3 characters")
+    .max(100, "Organization name must not exceed 100 characters")
+    .refine((val) => val.trim().length > 0, "Organization name cannot be only whitespace"),
+  slug: z
+    .string()
+    .trim()
+    .min(1, "Slug is required")
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Invalid slug format"),
+});
+
+// Export type for TypeScript
+export type OrganizationFormData = z.infer<typeof organizationSchema>;
+```
+
+#### Client-Side Form Component
+Use `Field`, `FieldLabel`, `FieldDescription`, `FieldError`, `FieldGroup` from `@/components/ui/field` (shadcn/ui recommended pattern):
+
+```tsx
+"use client";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Field, FieldLabel, FieldDescription, FieldError, FieldGroup } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
+import { organizationSchema, type OrganizationFormData } from "./schema";
+
+export function CreateForm() {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<OrganizationFormData>({
+    resolver: zodResolver(organizationSchema),
+    defaultValues: {
+      name: "",
+      slug: "",
+    },
+  });
+
+  const onSubmit = async (data: OrganizationFormData) => {
+    const result = await createOrganization(data.name, data.slug);
+    if (result.success) {
+      toast.success("Organization created!");
+    } else {
+      toast.error(result.error);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <FieldGroup>
+        <Field data-invalid={!!errors.name}>
+          <FieldLabel>Organization Name</FieldLabel>
+          <Input
+            {...register("name")}
+            placeholder="Acme Inc"
+            aria-invalid={!!errors.name}
+          />
+          <FieldDescription>
+            The display name for your organization
+          </FieldDescription>
+          {errors.name && <FieldError>{errors.name.message}</FieldError>}
+        </Field>
+
+        <Field data-invalid={!!errors.slug}>
+          <FieldLabel>Slug</FieldLabel>
+          <Input
+            {...register("slug")}
+            placeholder="acme-inc"
+            disabled
+            aria-invalid={!!errors.slug}
+          />
+          <FieldDescription>
+            URL-friendly identifier (auto-generated)
+          </FieldDescription>
+          {errors.slug && <FieldError>{errors.slug.message}</FieldError>}
+        </Field>
+      </FieldGroup>
+
+      <Button type="submit" disabled={isSubmitting}>
+        {isSubmitting ? (
+          <>
+            <Spinner className="mr-2" />
+            Creating...
+          </>
+        ) : (
+          "Create Organization"
+        )}
+      </Button>
+    </form>
+  );
+}
+```
+
+#### Server-Side Validation (CRITICAL)
+**Always validate on the server** - client validation can be bypassed. Use the same schema:
+
+```tsx
+"use server";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { organizationSchema } from "./schema";
+
+export async function createOrganization(name: string, slug: string) {
+  try {
+    // Server-side validation - CRITICAL for security
+    // Never trust client-side data
+    const validatedData = organizationSchema.parse({ name, slug });
+
+    const data = await auth.api.createOrganization({
+      body: {
+        name: validatedData.name,
+        slug: validatedData.slug,
+      },
+      headers: await headers(),
+    });
+
+    return { success: true, data };
+  } catch (error: any) {
+    // Handle Zod validation errors
+    if (error.name === "ZodError") {
+      return {
+        success: false,
+        error: error.errors.map((e: any) => e.message).join(", "),
+      };
+    }
+    return {
+      success: false,
+      error: error.message || "Failed to create organization",
+    };
+  }
+}
+```
+
+#### Loading States with Spinner
+Always use the `Spinner` component for loading indicators:
+
+```tsx
+import { Spinner } from "@/components/ui/spinner";
+
+// In buttons
+<Button disabled={isSubmitting}>
+  {isSubmitting ? (
+    <>
+      <Spinner className="mr-2" />
+      Loading...
+    </>
+  ) : (
+    "Submit"
+  )}
+</Button>
+
+// Standalone
+{isPending && <Spinner className="size-6" />}
+```
+
+#### Form Best Practices Checklist
+- ✅ Create `schema.ts` file with Zod schema
+- ✅ Export TypeScript type with `z.infer<typeof schema>`
+- ✅ Use `zodResolver` in `useForm` hook
+- ✅ Use `Field` components instead of bare `Label`
+- ✅ Add `data-invalid` prop to Field for error styling
+- ✅ Show `FieldError` for validation messages
+- ✅ Use `aria-invalid` for accessibility
+- ✅ Validate on server with same schema
+- ✅ Use `Spinner` component for loading states
+- ✅ Handle `isSubmitting` state to disable buttons
+- ✅ Add `.trim()` to string fields to prevent whitespace-only input
+- ✅ Use `.refine()` for complex validation rules
+
+#### Security: Dual Validation Pattern
+```
+Client (UX)          Server (Security)
+    ↓                      ↓
+Zod Schema  ←────────→  Zod Schema
+(schema.ts)           (schema.ts)
+    ↓                      ↓
+React Hook Form      Server Action
+    ↓                      ↓
+User sees errors     Malicious data blocked
+```
+
+**Why both?**
+- Client: Immediate feedback, better UX
+- Server: Cannot be bypassed, protects database
 
 ### Environment Variables
 - `DATABASE_URL` - PostgreSQL connection string (required for Prisma)
@@ -158,34 +333,11 @@ import { useSession } from "@/lib/auth-client";
 
 const { data: session, isPending } = useSession();
 
-if (isPending) return <div>Loading...</div>;
+if (isPending) return <Spinner />;
 if (!session) return <div>Not authenticated</div>;
 
 // Access user data
 const { user, session: sessionData } = session;
-```
-
-### Creating Server Actions
-```tsx
-"use server";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
-
-export async function createOrganization(name: string) {
-  try {
-    // Generate slug from name
-    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-
-    const data = await auth.api.createOrganization({
-      body: { name, slug },
-      headers: await headers(),
-    });
-
-    return { success: true, data };
-  } catch (error: any) {
-    return { success: false, error: error.message };
-  }
-}
 ```
 
 ### Password Hashing
@@ -228,3 +380,7 @@ export const auth = betterAuth({
 - Component files use PascalCase: `CreateOrganizationDialog.tsx`
 - Utility functions in `lib/`, reusable components in `components/`
 - Prefer Server Actions over API routes for mutations
+- **Always create `schema.ts` for form validation** - use same schema on client and server
+- **Use Field components** instead of bare Label for forms
+- **Use Spinner component** for all loading states
+- **Validate on both client and server** - client for UX, server for security
