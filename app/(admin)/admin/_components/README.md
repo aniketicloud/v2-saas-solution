@@ -4,7 +4,8 @@
 
 ```
 app/(admin)/admin/_components/
-└── admin-sidebar.tsx    # Shadcn sidebar with navigation
+├── admin-sidebar.tsx      # Shadcn sidebar with navigation
+└── admin-breadcrumb.tsx   # Dynamic breadcrumb navigation
 ```
 
 ## Import Paths
@@ -42,7 +43,31 @@ import { AdminSidebar } from "../../_components/admin-sidebar";
 
 ### Route-Specific Components (`app/(admin)/admin/_components/`)
 - Only used within admin routes
-- Example: `admin-sidebar.tsx`
+- Examples: `admin-sidebar.tsx`, `admin-breadcrumb.tsx`
+
+## Adding New Routes
+
+### To Sidebar Navigation
+Edit `admin-sidebar.tsx` and add to `navItems` array:
+```tsx
+const navItems = [
+  // ... existing items
+  {
+    title: "New Page",
+    url: "/admin/new-page",
+    icon: YourIcon,
+  },
+];
+```
+
+### To Breadcrumb
+Edit `admin-breadcrumb.tsx` and add to `routeLabels` object:
+```tsx
+const routeLabels: Record<string, string> = {
+  // ... existing routes
+  "/admin/new-page": "New Page",
+};
+```
 
 ## Quick Reference
 
