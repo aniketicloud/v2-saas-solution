@@ -93,7 +93,7 @@ export function CreateOrganizationDialog() {
       const result = await createOrganization(data.name, data.slug);
 
       if (result.success) {
-        toast.success("Organization created successfully!");
+        toast.success(`Organization "${data.name}" created successfully!`);
         setOpen(false);
         reset();
         router.refresh();
