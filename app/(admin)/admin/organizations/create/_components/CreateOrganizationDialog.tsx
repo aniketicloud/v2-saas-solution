@@ -24,7 +24,6 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -44,24 +43,12 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Plus } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
 import { createOrganization } from "../action";
+import { generateSlug } from "../utils";
+import { organizationSchema, type OrganizationFormData } from "../schema";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-
-const organizationSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(1, "Organization name is required")
-    .min(3, "Organization name must be at least 3 characters")
-    .max(100, "Organization name must not exceed 100 characters")
-    .refine((val) => val.trim().length > 0, {
-      message: "Organization name cannot be only whitespace",
-    }),
-  slug: z.string(), // Auto-generated, no validation needed
-});
-
-type OrganizationFormData = z.infer<typeof organizationSchema>;
 
 export function CreateOrganizationDialog() {
   const [open, setOpen] = useState(false);
@@ -81,16 +68,6 @@ export function CreateOrganizationDialog() {
       slug: "",
     },
   });
-
-  const nameValue = watch("name");
-
-  // Auto-generate slug when name changes
-  const generateSlug = (value: string) => {
-    return value
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "");
-  };
 
   // Watch name field and update slug automatically
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -113,7 +90,7 @@ export function CreateOrganizationDialog() {
 
   const onSubmit = async (data: OrganizationFormData) => {
     try {
-      const result = await createOrganization(data.name);
+      const result = await createOrganization(data.name, data.slug);
 
       if (result.success) {
         toast.success("Organization created successfully!");
@@ -187,7 +164,14 @@ export function CreateOrganizationDialog() {
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Creating..." : "Create Organization"}
+              {isSubmitting ? (
+                <>
+                  <Spinner className="mr-2" />
+                  Creating...
+                </>
+              ) : (
+                "Create Organization"
+              )}
             </Button>
           </DialogFooter>
         </form>

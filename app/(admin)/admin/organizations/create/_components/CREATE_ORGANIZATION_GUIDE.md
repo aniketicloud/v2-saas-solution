@@ -42,18 +42,36 @@ A fully-featured dialog component for creating new organizations with real-time 
 - Next.js App Router (navigation)
 ```
 
+## Architecture & Security
+
+### 🔒 Dual Validation (Client + Server)
+- **Client-side**: Provides immediate feedback to users
+- **Server-side**: CRITICAL security validation - never trust client data
+- **Shared Schema**: `schema.ts` ensures consistency between both sides
+
+### File Structure
+```
+create/
+├── schema.ts                    # Shared Zod schema (client + server)
+├── utils.ts                     # Shared utilities (generateSlug)
+├── action.ts                    # Server action with validation
+└── _components/
+    ├── CreateOrganizationDialog.tsx
+    └── CREATE_ORGANIZATION_GUIDE.md
+```
+
 ## Component Structure
 
 ```tsx
 CreateOrganizationDialog/
-├── Zod Schema (organizationSchema)
+├── Shared Zod Schema (from schema.ts)
 ├── React Hook Form setup
-├── Auto-slug generation logic
+├── Auto-slug generation logic (from utils.ts)
 ├── Dialog UI
 │   ├── Trigger Button
 │   ├── Form
 │   │   ├── Name Field (with validation)
-│   │   ├── Slug Field (auto-generated, disabled)
+│   │   ├── Slug Field (auto-generated, validated)
 │   │   └── Action Buttons
 │   └── Toast Notifications
 ```
@@ -72,10 +90,12 @@ export default function OrganizationsPage() {
 }
 ```
 
-## Validation Schema
+## Shared Validation Schema
+
+Located in `../schema.ts` and used by both client and server:
 
 ```tsx
-const organizationSchema = z.object({
+export const organizationSchema = z.object({
   name: z
     .string()
     .trim()
@@ -85,9 +105,26 @@ const organizationSchema = z.object({
     .refine((val) => val.trim().length > 0, {
       message: "Organization name cannot be only whitespace",
     }),
-  slug: z.string(), // Auto-generated, no validation needed
+  slug: z
+    .string()
+    .trim()
+    .min(1, "Slug is required")
+    .min(3, "Slug must be at least 3 characters")
+    .max(100, "Slug must not exceed 100 characters")
+    .regex(
+      /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+      "Slug must contain only lowercase letters, numbers, and hyphens"
+    ),
 });
+
+export type OrganizationFormData = z.infer<typeof organizationSchema>;
 ```
+
+### Why Validate Slug?
+Even though the slug is auto-generated and disabled on the client, we validate it on the server because:
+- Client-side validation can be bypassed (e.g., via browser DevTools or API calls)
+- Security best practice: **Never trust client data**
+- Prevents malicious or malformed slugs from reaching the database
 
 ## Key Implementation Details
 
@@ -156,19 +193,47 @@ const generateSlug = (value: string) => {
 
 ```tsx
 // app/(admin)/admin/organizations/create/action.ts
-export async function createOrganization(name: string) {
+"use server";
+
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { organizationSchema } from "./schema";
+
+export async function createOrganization(name: string, slug: string) {
   try {
-    const slug = generateSlug(name);
+    // CRITICAL: Server-side validation - never trust client data
+    const validatedData = organizationSchema.parse({ name, slug });
+
     const data = await auth.api.createOrganization({
-      body: { name, slug },
+      body: {
+        name: validatedData.name,
+        slug: validatedData.slug,
+      },
       headers: await headers(),
     });
+    
     return { success: true, data };
   } catch (error: any) {
-    return { success: false, error: error.message };
+    // Handle Zod validation errors
+    if (error.name === "ZodError") {
+      return {
+        success: false,
+        error: error.errors.map((e: any) => e.message).join(", "),
+      };
+    }
+    return {
+      success: false,
+      error: error.message || "Failed to create organization",
+    };
   }
 }
 ```
+
+### Security Notes:
+- ✅ **Server validation is mandatory** - Client validation can be bypassed
+- ✅ **Uses shared schema** - Ensures consistency with client-side rules
+- ✅ **Validates both fields** - Name AND slug (even though slug is auto-generated)
+- ✅ **Detailed error handling** - Differentiates validation vs. system errors
 
 ## Error Handling
 
@@ -253,10 +318,45 @@ const generateSlug = (value: string) => {
 }
 ```
 
+## Security Best Practices
+
+### 🔒 Why Validate on Both Client and Server?
+
+**Client-Side Validation (UX)**:
+- ✅ Immediate feedback to users
+- ✅ Reduces unnecessary server requests
+- ✅ Better user experience
+- ❌ **Can be bypassed** via DevTools, Postman, etc.
+
+**Server-Side Validation (Security)**:
+- ✅ **Cannot be bypassed** - runs in trusted environment
+- ✅ Protects against malicious data
+- ✅ Prevents database corruption
+- ✅ **This is your security boundary**
+
+### Attack Scenarios Prevented:
+
+1. **Direct API Calls**: Attacker bypasses UI and calls server action directly
+   - ✅ Server validation catches invalid data
+
+2. **Modified Client Code**: Attacker modifies React component to accept bad data
+   - ✅ Server validation catches it before database
+
+3. **Browser DevTools**: Attacker changes disabled slug field value
+   - ✅ Server validation ensures slug matches format
+
+4. **SQL Injection**: Malicious characters in name/slug
+   - ✅ Zod validation + Prisma parameterization prevents this
+
+### Key Principle:
+> **Never trust client data. Always validate on the server.**
+
 ## Related Files
 
 - Component: `CreateOrganizationDialog.tsx`
 - Server Action: `../action.ts`
+- Shared Schema: `../schema.ts` ⭐ (Used by both client & server)
+- Utilities: `../utils.ts` (generateSlug function)
 - Auth Config: `lib/auth.ts`
 - Field Components: `components/ui/field.tsx`
 
