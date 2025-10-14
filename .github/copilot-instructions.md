@@ -65,7 +65,7 @@ Three distinct routing patterns with separate layouts:
 
 ### Navigation Components
 Three specialized nav components match the routing structure:
-- `AdminNav` - Admin sidebar in dark gray (`app/(admin)/admin/layout.tsx`)
+- `AdminSidebar` - Admin collapsible sidebar using shadcn/ui (`app/(admin)/admin/_components/admin-sidebar.tsx`)
 - `DashboardNav` - User dashboard sidebar with module links
 - `OrgNav` - Organization-specific navigation
 
