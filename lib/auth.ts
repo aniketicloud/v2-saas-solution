@@ -16,6 +16,10 @@ export const auth = betterAuth({
       allowUserToCreateOrganization: async (user) => {
         return user.role === "admin"; // Only admins can create orgs. The create org UI is hidden for non-admins.
       },
+      teams: {
+        enabled: true,
+        allowRemovingAllTeams: false,
+      },
     }),
   ],
 });
