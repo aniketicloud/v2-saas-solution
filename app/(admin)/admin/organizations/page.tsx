@@ -6,6 +6,7 @@ import {
   OrganizationsHeader,
   OrganizationCard,
 } from "./_components";
+import { getOrganizations } from "./action";
 
 export default async function AdminOrganizationsPage() {
   // Check if user is admin
@@ -20,9 +21,7 @@ export default async function AdminOrganizationsPage() {
     redirect("/dashboard");
   }
 
-  const organizations = await auth.api.listOrganizations({
-    headers: await headers(),
-  });
+  const organizations = await getOrganizations();
 
   return (
     <div className="space-y-6">

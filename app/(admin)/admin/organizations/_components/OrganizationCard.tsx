@@ -8,6 +8,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Building } from "lucide-react";
+import Image from "next/image";
 
 type Organization = {
   id: string;
@@ -29,7 +30,7 @@ export function OrganizationCard({ organization }: OrganizationCardProps) {
         <div className="flex items-start justify-between">
           <div className="flex items-start gap-3">
             {organization.logo ? (
-              <img
+              <Image
                 src={organization.logo}
                 alt={organization.name}
                 className="h-10 w-10 rounded-lg object-cover"
@@ -46,7 +47,7 @@ export function OrganizationCard({ organization }: OrganizationCardProps) {
               </CardDescription>
             </div>
           </div>
-          <Badge variant="default">Active</Badge>
+          <Badge variant="default">Active placeholder</Badge>
         </div>
       </CardHeader>
       <CardContent>
