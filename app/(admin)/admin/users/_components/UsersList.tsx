@@ -1,13 +1,6 @@
 "use client";
 
 import * as React from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { DataTable } from "./data-table";
 import { columns, User } from "./columns";
 import { listAllUsers } from "../action";
@@ -46,30 +39,22 @@ export function UsersList() {
     router.push(`?${params.toString()}`);
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <Spinner className="size-8" />
+      </div>
+    );
+  }
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>All Users</CardTitle>
-        <CardDescription>
-          A list of all users registered on the platform ({totalCount} total)
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        {isLoading ? (
-          <div className="flex items-center justify-center p-8">
-            <Spinner className="size-8" />
-          </div>
-        ) : (
-          <DataTable
-            columns={columns}
-            data={users}
-            totalCount={totalCount}
-            pageSize={pageSize}
-            currentPage={currentPage}
-            onPageChange={handlePageChange}
-          />
-        )}
-      </CardContent>
-    </Card>
+    <DataTable
+      columns={columns}
+      data={users}
+      totalCount={totalCount}
+      pageSize={pageSize}
+      currentPage={currentPage}
+      onPageChange={handlePageChange}
+    />
   );
 }
