@@ -54,6 +54,55 @@ Three distinct routing patterns with separate layouts:
   - `signUpEmail`, `signInEmail`, `getSession`
   - `setPassword`, `updateUser`, `deleteUser` (with admin plugin)
 
+#### Error Handling with tryCatch Utility
+**ALWAYS use the `tryCatch` utility** from `@/utils/try-catch` for cleaner error handling in server actions:
+
+```tsx
+"use server";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { tryCatch } from "@/utils/try-catch";
+
+export async function createOrganization(name: string, slug: string) {
+  const [result, error] = await tryCatch(
+    auth.api.createOrganization({
+      body: { name, slug },
+      headers: await headers(),
+    })
+  );
+
+  if (error) {
+    console.error("Error creating organization:", error);
+    return {
+      success: false,
+      error: error.message || "Failed to create organization",
+    };
+  }
+
+  return { success: true, data: result };
+}
+```
+
+**Why tryCatch over try-catch:**
+- ✅ Cleaner, more linear code flow (no nested blocks)
+- ✅ Go-style error handling with tuple destructuring
+- ✅ Especially useful with multiple sequential async operations
+- ✅ Still returns the same `{ success, data, error }` structure to clients
+- ✅ Type-safe with proper TypeScript inference
+
+**Pattern for multiple async calls:**
+```tsx
+export async function complexAction() {
+  const [users, usersError] = await tryCatch(auth.api.listUsers({...}));
+  if (usersError) return { success: false, error: usersError.message };
+
+  const [orgs, orgsError] = await tryCatch(auth.api.listOrganizations({...}));
+  if (orgsError) return { success: false, error: orgsError.message };
+
+  return { success: true, data: { users, orgs } };
+}
+```
+
 ### UI Components (shadcn/ui)
 - **Style**: "new-york" variant with CSS variables enabled
 - **Base Color**: zinc
