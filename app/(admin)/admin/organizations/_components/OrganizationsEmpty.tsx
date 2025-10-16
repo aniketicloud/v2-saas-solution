@@ -7,7 +7,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { CreateOrganizationDialog } from "../create/_components/CreateOrganizationDialog";
+import { CreateOrganizationDialog } from "@/app/dashboard/organizations/_components/CreateOrganizationDialog";
 
 export function OrganizationsEmpty() {
   return (
