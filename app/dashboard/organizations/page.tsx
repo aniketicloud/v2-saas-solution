@@ -21,9 +21,9 @@ export default async function OrganizationPage() {
 
   const isAdmin = session?.user?.role === "admin";
 
-  // Redirect non-admin users to dashboard
+  //TODO: Redirect non-admin users to root where we can manage where to redirect them
   if (!isAdmin) {
-    redirect("/dashboard");
+    redirect("/");
   }
 
   const organizations = await auth.api.listOrganizations({

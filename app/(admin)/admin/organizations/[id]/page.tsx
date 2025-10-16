@@ -8,6 +8,7 @@ import {
   Link as LinkIcon,
   Calendar,
   Users,
+  Trash2,
 } from "lucide-react";
 import Link from "next/link";
 import { getOrganizationWithDetails } from "../_lib/queries";
@@ -55,12 +56,20 @@ export default async function AdminOrganizationDetailPage({
         title={organization.name}
         description={`Organization details and management`}
         action={
-          <Button asChild>
-            <Link href={`/admin/organizations/${id}/edit`}>
-              <Pencil className="mr-2 h-4 w-4" />
-              Edit Organization
-            </Link>
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" asChild>
+              <Link href={`/admin/organizations/${id}/edit`}>
+                <Pencil className="mr-2 h-4 w-4" />
+                Edit
+              </Link>
+            </Button>
+            <Button variant="destructive" asChild>
+              <Link href={`/admin/organizations/${id}/delete`}>
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete
+              </Link>
+            </Button>
+          </div>
         }
       />
 
