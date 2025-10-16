@@ -21,161 +21,26 @@
  * @see ./CREATE_ORGANIZATION_GUIDE.md
  */
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import {
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field";
 import { Plus } from "lucide-react";
-import { Spinner } from "@/components/ui/spinner";
-import { createOrganization } from "../action";
-import { generateSlug } from "../utils";
-import { organizationSchema, type OrganizationFormData } from "../schema";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+
+/**
+ * CreateOrganizationDialog Component (Simplified)
+ *
+ * Now acts as a navigation button to the dedicated create page.
+ * This provides a shareable URL while maintaining the same UI/UX.
+ *
+ * Route: /admin/organizations/create
+ */
 
 export function CreateOrganizationDialog() {
-  const [open, setOpen] = useState(false);
-  const router = useRouter();
-
-  const {
-    register,
-    handleSubmit,
-    watch,
-    setValue,
-    reset,
-    formState: { errors, isSubmitting },
-  } = useForm<OrganizationFormData>({
-    resolver: zodResolver(organizationSchema),
-    defaultValues: {
-      name: "",
-      slug: "",
-    },
-  });
-
-  // Watch name field and update slug automatically
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value;
-
-    // Prevent leading spaces
-    if (value.startsWith(" ")) {
-      value = value.trimStart();
-    }
-
-    // Prevent trailing spaces (only trim end if there's more than one space at the end)
-    // This allows typing a single space between words but prevents multiple trailing spaces
-    if (value.endsWith("  ")) {
-      value = value.trimEnd() + " ";
-    }
-
-    setValue("name", value);
-    setValue("slug", generateSlug(value));
-  };
-
-  const onSubmit = async (data: OrganizationFormData) => {
-    try {
-      const result = await createOrganization(data.name, data.slug);
-
-      if (result.success) {
-        toast.success(`Organization "${data.name}" created successfully!`);
-        setOpen(false);
-        reset();
-        router.refresh();
-      } else {
-        toast.error(result.error || "Failed to create organization");
-      }
-    } catch (error) {
-      toast.error("An unexpected error occurred");
-    }
-  };
-
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Organization
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <DialogHeader>
-            <DialogTitle>Create Organization</DialogTitle>
-            <DialogDescription>
-              Add a new organization to your account. The slug will be generated
-              automatically.
-            </DialogDescription>
-          </DialogHeader>
-          <FieldGroup className="py-4">
-            <Field data-invalid={!!errors.name}>
-              <FieldLabel htmlFor="name">Organization Name</FieldLabel>
-              <Input
-                id="name"
-                placeholder="My Organization"
-                {...register("name")}
-                onChange={handleNameChange}
-                disabled={isSubmitting}
-                autoComplete="off"
-                aria-invalid={!!errors.name}
-              />
-              {errors.name && <FieldError>{errors.name.message}</FieldError>}
-            </Field>
-            <Field data-invalid={!!errors.slug}>
-              <FieldLabel htmlFor="slug">Slug (auto-generated)</FieldLabel>
-              <Input
-                id="slug"
-                {...register("slug")}
-                disabled
-                className="bg-muted"
-                aria-invalid={!!errors.slug}
-              />
-              <FieldDescription>
-                This will be used in URLs and identifiers
-              </FieldDescription>
-              {errors.slug && <FieldError>{errors.slug.message}</FieldError>}
-            </Field>
-          </FieldGroup>
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                setOpen(false);
-                reset();
-              }}
-              disabled={isSubmitting}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? (
-                <>
-                  <Spinner className="mr-2" />
-                  Creating...
-                </>
-              ) : (
-                "Create Organization"
-              )}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+    <Button asChild>
+      <Link href="/admin/organizations/create">
+        <Plus className="mr-2 h-4 w-4" />
+        Add Organization
+      </Link>
+    </Button>
   );
 }

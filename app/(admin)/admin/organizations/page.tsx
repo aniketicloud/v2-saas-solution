@@ -1,34 +1,31 @@
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+import { PageHeader } from "@/components/page-header";
 import {
   OrganizationsEmpty,
-  OrganizationsHeader,
   OrganizationCard,
+  CreateOrganizationButton,
 } from "./_components";
-import { getOrganizations } from "./action";
+import { getOrganizations } from "./_lib/queries";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Organizations | Admin Portal",
+  description: "Manage all organizations in your platform",
+};
 
 export default async function AdminOrganizationsPage() {
-  // Check if user is admin
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  const isAdmin = session?.user?.role === "admin";
-
-  // Redirect non-admin users to dashboard
-  if (!isAdmin) {
-    redirect("/dashboard");
-  }
-
+  // Layout already validates admin role, no need to check again
   const organizations = await getOrganizations();
 
   return (
     <div className="space-y-6">
-      <OrganizationsHeader />
+      <PageHeader
+        title="Organizations"
+        description="Manage all organizations and their members"
+        action={<CreateOrganizationButton />}
+      />
 
       <div className="grid gap-6 md:grid-cols-2">
-        {!organizations || organizations.length === 0 ? (
+        {organizations.length === 0 ? (
           <OrganizationsEmpty />
         ) : (
           organizations.map((org) => (

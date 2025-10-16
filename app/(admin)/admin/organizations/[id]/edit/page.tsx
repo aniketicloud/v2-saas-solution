@@ -1,39 +1,29 @@
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { AlertCircle, Pencil } from "lucide-react";
-import Link from "next/link";
+import { AlertCircle } from "lucide-react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Organization Details | Admin Portal",
-  description: "View organization details and members",
+  title: "Edit Organization | Admin Portal",
+  description: "Update organization details",
 };
 
-interface AdminOrganizationDetailPageProps {
+interface EditOrganizationPageProps {
   params: {
     id: string;
   };
 }
 
-export default function AdminOrganizationDetailPage({
+export default function EditOrganizationPage({
   params,
-}: AdminOrganizationDetailPageProps) {
+}: EditOrganizationPageProps) {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Organization Details"
-        description="View and manage organization information"
-        action={
-          <Button asChild>
-            <Link href={`/admin/organizations/${params.id}/edit`}>
-              <Pencil className="mr-2 h-4 w-4" />
-              Edit Organization
-            </Link>
-          </Button>
-        }
+        title="Edit Organization"
+        description="Update organization details and settings"
       />
-      <div className="mx-auto max-w-4xl">
+      <div className="mx-auto max-w-2xl">
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3 text-muted-foreground">
@@ -41,7 +31,7 @@ export default function AdminOrganizationDetailPage({
               <div>
                 <p className="font-medium">Coming Soon</p>
                 <p className="text-sm">
-                  Detail view for organization ID:{" "}
+                  Edit functionality for organization ID:{" "}
                   <code className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded">
                     {params.id}
                   </code>{" "}
