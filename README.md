@@ -20,6 +20,21 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## 📚 Documentation
+
+Comprehensive project documentation is available in the [`docs/`](./docs) folder:
+
+- **[Architecture Decision Records (ADRs)](./docs/adr/)** - Architectural decisions and rationale
+- **[Implementation Guides](./docs/guides/)** - Step-by-step guides for common tasks
+- **[Documentation Index](./docs/README.md)** - Complete documentation overview
+
+### Quick Links
+
+- [Organizations Module Structure](./docs/adr/ADR-001-admin-organizations-restructuring.md)
+- [Navigation Best Practices](./docs/adr/ADR-002-admin-portal-home-navigation.md)
+- [Next.js 15 Patterns](./docs/adr/ADR-004-next-js-15-params-and-ux-fixes.md)
+- [Copilot Instructions](./.github/copilot-instructions.md)
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
