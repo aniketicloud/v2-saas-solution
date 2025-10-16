@@ -10,6 +10,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 
 export default async function AdminLayout({
   children,
@@ -43,6 +44,9 @@ export default async function AdminLayout({
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />
           <AdminBreadcrumb />
+          <div className="ml-auto flex items-center gap-2">
+            <ThemeSwitcher />
+          </div>
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4">
           <div className="mx-auto w-full max-w-7xl">{children}</div>
