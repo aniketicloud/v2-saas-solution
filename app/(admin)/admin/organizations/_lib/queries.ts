@@ -38,11 +38,59 @@ export async function getOrganizations() {
  * @returns Organization data or null on error
  */
 export async function getOrganization(id: string) {
-  // TODO: Implement when Better Auth provides getOrganizationById
-  // Currently Better Auth only has getFullOrganization by slug
-  // May need to use Prisma directly
+  const [organizations, error] = await tryCatch(
+    auth.api.listOrganizations({
+      headers: await headers(),
+    })
+  );
 
-  return null;
+  if (error) {
+    console.error("Error fetching organization:", error);
+    return null;
+  }
+
+  // Find the organization by ID from the list
+  const organization = organizations?.find((org) => org.id === id);
+  return organization || null;
+}
+
+/**
+ * Get organization with full details (members, teams, invitations)
+ *
+ * @param id - Organization ID
+ * @returns Full organization data or null on error
+ */
+export async function getOrganizationWithDetails(id: string) {
+  const { prisma } = await import("@/lib/prisma");
+
+  const [organization, error] = await tryCatch(
+    prisma.organization.findUnique({
+      where: { id },
+      include: {
+        members: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                image: true,
+              },
+            },
+          },
+        },
+        teams: true,
+        invitations: true,
+      },
+    })
+  );
+
+  if (error) {
+    console.error("Error fetching organization with details:", error);
+    return null;
+  }
+
+  return organization;
 }
 
 /**

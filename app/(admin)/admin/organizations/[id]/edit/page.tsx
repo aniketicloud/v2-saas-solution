@@ -1,6 +1,7 @@
 import { PageHeader } from "@/components/page-header";
-import { Card, CardContent } from "@/components/ui/card";
-import { AlertCircle } from "lucide-react";
+import { OrganizationForm } from "../../_components";
+import { getOrganization } from "../../_lib/queries";
+import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -9,14 +10,25 @@ export const metadata: Metadata = {
 };
 
 interface EditOrganizationPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
-export default function EditOrganizationPage({
+export default async function EditOrganizationPage({
   params,
 }: EditOrganizationPageProps) {
+  // Await params (Next.js 15 requirement)
+  const { id } = await params;
+
+  // Fetch the organization data
+  const organization = await getOrganization(id);
+
+  // If organization not found, show 404
+  if (!organization) {
+    notFound();
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -24,23 +36,15 @@ export default function EditOrganizationPage({
         description="Update organization details and settings"
       />
       <div className="mx-auto max-w-2xl">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3 text-muted-foreground">
-              <AlertCircle className="h-5 w-5" />
-              <div>
-                <p className="font-medium">Coming Soon</p>
-                <p className="text-sm">
-                  Edit functionality for organization ID:{" "}
-                  <code className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded">
-                    {params.id}
-                  </code>{" "}
-                  will be implemented soon.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <OrganizationForm
+          mode="edit"
+          organizationId={organization.id}
+          initialData={{
+            name: organization.name,
+            slug: organization.slug,
+          }}
+          onCancelPath={`/admin/organizations/${organization.id}`}
+        />
       </div>
     </div>
   );

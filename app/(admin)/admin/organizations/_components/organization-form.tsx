@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/field";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
-import { createOrganization } from "../_lib/actions";
+import { createOrganization, updateOrganization } from "../_lib/actions";
 import { generateSlug } from "../_lib/utils";
 import { organizationSchema, type OrganizationFormData } from "../_lib/schema";
 import { toast } from "sonner";
@@ -37,14 +37,17 @@ interface OrganizationFormProps {
   mode: "create" | "edit";
   initialData?: OrganizationFormData;
   organizationId?: string;
+  onCancelPath?: string; // Optional custom cancel path
 }
 
 export function OrganizationForm({
   mode,
   initialData,
   organizationId,
+  onCancelPath,
 }: OrganizationFormProps) {
   const router = useRouter();
+  const cancelPath = onCancelPath || "/admin/organizations";
 
   const {
     register,
@@ -95,8 +98,26 @@ export function OrganizationForm({
           toast.error(result.error || "Failed to create organization");
         }
       } else {
-        // Edit mode - to be implemented
-        toast.error("Edit functionality not yet implemented");
+        // Edit mode
+        if (!organizationId) {
+          toast.error("Organization ID is required for updates");
+          return;
+        }
+
+        const result = await updateOrganization(
+          organizationId,
+          data.name,
+          data.slug
+        );
+
+        if (result.success) {
+          toast.success(`Organization "${data.name}" updated successfully!`);
+          // Redirect back to detail page after successful edit
+          router.push(`/admin/organizations/${organizationId}`);
+          router.refresh();
+        } else {
+          toast.error(result.error || "Failed to update organization");
+        }
       }
     } catch (error) {
       toast.error("An unexpected error occurred");
@@ -136,9 +157,12 @@ export function OrganizationForm({
                 className={mode === "create" ? "bg-muted" : ""}
                 aria-invalid={!!errors.slug}
                 placeholder={mode === "edit" ? "organization-slug" : ""}
+                autoComplete="off"
               />
               <FieldDescription>
-                This will be used in URLs and identifiers
+                {mode === "edit"
+                  ? "URL-friendly identifier. Change carefully as it affects existing links."
+                  : "This will be used in URLs and identifiers"}
               </FieldDescription>
               {errors.slug && <FieldError>{errors.slug.message}</FieldError>}
             </Field>
@@ -149,7 +173,7 @@ export function OrganizationForm({
           <Button
             type="button"
             variant="outline"
-            onClick={() => router.push("/admin/organizations")}
+            onClick={() => router.push(cancelPath)}
             disabled={isSubmitting}
           >
             Cancel

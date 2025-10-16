@@ -6,7 +6,8 @@
     "dev": "prisma generate --no-hints && next dev --turbopack",
     "build": "prisma generate --no-hints && next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "shadcn:check": "pnpm dlx shadcn@latest diff"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

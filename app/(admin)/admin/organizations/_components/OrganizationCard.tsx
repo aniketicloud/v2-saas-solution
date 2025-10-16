@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Building } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 type Organization = {
   id: string;
@@ -68,8 +69,14 @@ export function OrganizationCard({ organization }: OrganizationCardProps) {
               <Badge variant="outline">Available</Badge>
             </div>
           )}
-          <Button variant="outline" className="w-full mt-4 bg-transparent">
-            Manage Organization
+          <Button
+            variant="outline"
+            className="w-full mt-4 bg-transparent"
+            asChild
+          >
+            <Link href={`/admin/organizations/${organization.id}`}>
+              Manage Organization
+            </Link>
           </Button>
         </div>
       </CardContent>

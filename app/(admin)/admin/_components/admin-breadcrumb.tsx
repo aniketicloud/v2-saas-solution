@@ -22,11 +22,25 @@ const segmentLabels: Record<string, string> = {
   edit: "Edit",
 };
 
+// Helper to check if segment looks like an ID (alphanumeric, longer than 10 chars)
+function isIdSegment(segment: string): boolean {
+  return segment.length > 10 && /^[a-zA-Z0-9_-]+$/.test(segment);
+}
+
 // Helper to convert segment to label
-function getSegmentLabel(segment: string): string {
-  return (
-    segmentLabels[segment] || segment.charAt(0).toUpperCase() + segment.slice(1)
-  );
+function getSegmentLabel(segment: string, prevSegment?: string): string {
+  // If it's a known segment, use the mapped label
+  if (segmentLabels[segment]) {
+    return segmentLabels[segment];
+  }
+
+  // If it looks like an ID and previous segment was "organizations", label it as "Details"
+  if (isIdSegment(segment) && prevSegment === "organizations") {
+    return "Organization Details";
+  }
+
+  // Otherwise capitalize first letter
+  return segment.charAt(0).toUpperCase() + segment.slice(1);
 }
 
 export function AdminBreadcrumb() {
@@ -38,7 +52,8 @@ export function AdminBreadcrumb() {
   // Build breadcrumb items from segments
   const breadcrumbItems = segments.map((segment, index) => {
     const path = "/" + segments.slice(0, index + 1).join("/");
-    const label = getSegmentLabel(segment);
+    const prevSegment = index > 0 ? segments[index - 1] : undefined;
+    const label = getSegmentLabel(segment, prevSegment);
     const isLast = index === segments.length - 1;
 
     return { path, label, isLast };
