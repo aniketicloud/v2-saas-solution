@@ -169,7 +169,7 @@ export function OrganizationForm({
           </FieldGroup>
         </CardContent>
 
-        <CardFooter className="flex justify-between">
+        <CardFooter className="flex justify-between gap-4 pt-6">
           <Button
             type="button"
             variant="outline"

@@ -50,6 +50,18 @@ export function useColorPalette() {
     Object.entries(colors).forEach(([key, value]) => {
       root.style.setProperty(key, value);
     });
+
+    // Apply fonts if palette defines them
+    if (paletteData.fonts) {
+      root.style.setProperty("--font-sans", `${paletteData.fonts.sans}, sans-serif`);
+      root.style.setProperty("--font-serif", `${paletteData.fonts.serif}, serif`);
+      root.style.setProperty("--font-mono", `${paletteData.fonts.mono}, monospace`);
+    } else {
+      // Reset to default fonts if palette doesn't define them
+      root.style.setProperty("--font-sans", "var(--font-dm-sans), sans-serif");
+      root.style.setProperty("--font-serif", "var(--font-dm-sans), sans-serif");
+      root.style.setProperty("--font-mono", "var(--font-space-mono), monospace");
+    }
   }, [palette, mounted]);
 
   // Also listen for theme changes (light/dark) to reapply correct palette
@@ -73,6 +85,17 @@ export function useColorPalette() {
           Object.entries(colors).forEach(([key, value]) => {
             root.style.setProperty(key, value);
           });
+
+          // Re-apply fonts as well
+          if (paletteData.fonts) {
+            root.style.setProperty("--font-sans", `${paletteData.fonts.sans}, sans-serif`);
+            root.style.setProperty("--font-serif", `${paletteData.fonts.serif}, serif`);
+            root.style.setProperty("--font-mono", `${paletteData.fonts.mono}, monospace`);
+          } else {
+            root.style.setProperty("--font-sans", "var(--font-dm-sans), sans-serif");
+            root.style.setProperty("--font-serif", "var(--font-dm-sans), sans-serif");
+            root.style.setProperty("--font-mono", "var(--font-space-mono), monospace");
+          }
         }
       });
     });
