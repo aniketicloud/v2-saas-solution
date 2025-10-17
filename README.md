@@ -1,24 +1,121 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# v2-saas-solution
+
+A Next.js 15 SaaS starter with multi-tenant organization support, built with App Router, Better Auth, Prisma, and shadcn/ui.
+
+## Features
+
+- 🔐 **Better Auth** - Comprehensive authentication with email/password, sessions, and role-based access
+- 🏢 **Multi-tenant Organizations** - Full organization management with teams and member roles
+- 🎨 **shadcn/ui** - Beautiful, accessible UI components with dark mode support
+- 🗄️ **Prisma** - Type-safe database ORM with PostgreSQL
+- ⚡ **Next.js 15** - App Router with Turbopack for blazing fast builds
+- 🐳 **Docker** - Local PostgreSQL development environment
 
 ## Getting Started
 
-First, run the development server:
+### Environment Variables
+
+Create a `.env.local` file in the root directory with the following variables:
 
 ```bash
-npm run dev
+# Authentication
+BETTER_AUTH_SECRET=generated_secret_value_using_best_practices
+
+# URL for the authentication service
+BETTER_AUTH_URL=http://localhost:3000 
+
+# Public API URL
+NEXT_PUBLIC_API_URL=http://localhost:3000
+
+# Database if you are using Docker for local development.
+# If you are using Neon or other postgres SAAS, keep only DATABASE_URL in production
+DATABASE_URL=postgresql://postgres:password@localhost:5432/better_auth_tutorial
+DB_HOST=localhost
+DB_PORT=5432
+DB_PASSWORD=password
+DB_USER=postgres
+DB_NAME=better_auth_tutorial
+```
+
+**Note:** You can also reference `.example.env` for the complete environment configuration.
+
+### Start Docker Database (Local Development)
+
+If you're using Docker for local PostgreSQL, start the database first:
+
+```bash
+docker-compose up -d
+```
+
+This will start the PostgreSQL database in the background using the configuration in `docker-compose.yml`. Make sure Docker Desktop is running before executing this command.
+
+**Useful Docker commands:**
+```bash
+# Start database
+docker-compose up -d
+
+# Stop database
+docker-compose down
+
+# View logs
+docker-compose logs -f
+
+# Stop and remove volumes (caution: deletes data)
+docker-compose down -v
+```
+
+### Run Database Migrations
+
+After the database is running, apply the Prisma migrations:
+
+```bash
+npx prisma migrate dev
 # or
-yarn dev
-# or
+pnpm prisma migrate dev
+```
+
+### Quick Start (Recommended)
+
+Use the setup script to start everything at once:
+
+```bash
+pnpm db:setup  # Starts Docker and runs migrations
+pnpm dev       # Start the development server
+```
+
+### Manual Setup
+
+Or run each step individually:
+
+```bash
+# 1. Start Docker database
+pnpm docker:up
+
+# 2. Run database migrations
+pnpm db:migrate
+
+# 3. Start the development server
 pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Database Reset (When Switching Databases)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+If you reset your database or switch to a new one, you may encounter session errors. Here's how to handle it:
+
+**Option 1: Full Reset (Recommended)**
+```bash
+pnpm docker:reset  # Stops Docker, removes volumes, and restarts
+pnpm db:migrate    # Apply migrations to fresh database
+```
+
+**Option 2: Database Only Reset**
+```bash
+pnpm db:reset      # Resets database schema and data
+```
+
+**Note:** The application now includes middleware that automatically clears invalid session cookies when the database changes, so you shouldn't need to manually clear browser cookies anymore.
 
 ## 📚 Documentation
 
@@ -35,17 +132,40 @@ Comprehensive project documentation is available in the [`docs/`](./docs) folder
 - [Next.js 15 Patterns](./docs/adr/ADR-004-next-js-15-params-and-ux-fixes.md)
 - [Copilot Instructions](./.github/copilot-instructions.md)
 
-## Learn More
+## Tech Stack
 
-To learn more about Next.js, take a look at the following resources:
+- **Framework:** Next.js 15 with App Router and Turbopack
+- **Authentication:** Better Auth with admin and organization plugins
+- **Database:** PostgreSQL with Prisma ORM
+- **UI Components:** shadcn/ui (New York variant)
+- **Styling:** Tailwind CSS with CSS variables
+- **Icons:** Lucide React
+- **Forms:** React Hook Form + Zod v4
+- **Package Manager:** pnpm
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Project Structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+├── app/                      # Next.js App Router
+│   ├── (admin)/             # Admin portal routes
+│   ├── (organization)/      # Organization-specific routes
+│   ├── dashboard/           # User dashboard
+│   └── api/auth/            # Better Auth API routes
+├── components/              # React components
+│   └── ui/                  # shadcn/ui components
+├── lib/                     # Core utilities
+│   ├── auth.ts             # Better Auth configuration
+│   ├── auth-client.ts      # Client-side auth utilities
+│   └── prisma.ts           # Prisma client singleton
+├── prisma/                  # Database schema and migrations
+├── docs/                    # Project documentation
+└── utils/                   # Helper utilities
+```
 
-## Deploy on Vercel
+## Contributing
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Please refer to the [documentation](./docs) for development guidelines and architectural decisions.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## License
+
+This project is private and proprietary.

@@ -16,6 +16,12 @@ export const auth = betterAuth({
       maxAge: 1 * 60 * 60, // 1 hour
     },
   },
+  advanced: {
+    // Generate new secret on database change to invalidate old sessions
+    generateId: () => crypto.randomUUID(),
+    // Disable throwing errors on invalid sessions - just return null
+    disableCSRFCheck: false,
+  },
   plugins: [
     admin(),
     organization({

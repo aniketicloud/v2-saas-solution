@@ -7,7 +7,16 @@
     "build": "prisma generate --no-hints && next build --turbopack",
     "start": "next start",
     "lint": "eslint",
-    "shadcn:check": "pnpm dlx shadcn@latest diff"
+    "shadcn:check": "pnpm dlx shadcn@latest diff",
+    "docker:up": "docker-compose --env-file .env.local up -d",
+    "docker:down": "docker-compose --env-file .env.local down",
+    "docker:logs": "docker-compose --env-file .env.local logs -f",
+    "docker:reset": "docker-compose --env-file .env.local down -v && docker-compose --env-file .env.local up -d",
+    "db:migrate": "prisma migrate dev",
+    "db:studio": "prisma studio",
+    "db:seed": "prisma db seed",
+    "db:reset": "prisma migrate reset --force",
+    "db:setup": "pnpm docker:up && pnpm db:migrate"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
