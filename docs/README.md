@@ -2,11 +2,21 @@
 
 Welcome to the v2-saas-solution documentation. This directory contains all architectural decisions, guides, and historical documentation.
 
-## 📁 Directory Structure
+## � Getting Started
+
+New to the project? Start here:
+
+1. **[Project Setup Guide](./PROJECT_SETUP.md)** - Complete setup instructions
+2. **[Database Seeding](./DATABASE_SEEDING.md)** - Test account creation
+3. **[Copilot Instructions](../.github/copilot-instructions.md)** - Development patterns and conventions
+
+## �📁 Directory Structure
 
 ```
 docs/
 ├── README.md                    ← You are here
+├── PROJECT_SETUP.md             ← Complete setup guide
+├── DATABASE_SEEDING.md          ← Database seeding guide
 ├── ORGANIZATION_SUMMARY.md      ← How docs were organized
 ├── adr/                         ← Architecture Decision Records
 │   ├── README.md
@@ -17,20 +27,21 @@ docs/
 ├── guides/                      ← Implementation guides
 │   ├── admin-sidebar.md
 │   ├── admin-components.md
+│   ├── theme-switcher.md
+│   ├── color-palette-system.md
 │   └── ORGANIZATIONS_MIGRATION_GUIDE.md
 └── archive/                     ← Superseded documentation
-    ├── ADMIN_REFACTORING_PROPOSAL.md
-    ├── NAVIGATION_ISSUE_RESOLUTION.md
-    ├── ORGANIZATIONS_DOCUMENTATION_INDEX.md
-    ├── ORGANIZATIONS_REFACTORING_CHECKLIST.md
-    └── ORGANIZATIONS_REFACTORING_SUMMARY.md
 ```
 
 > 📝 See [ORGANIZATION_SUMMARY.md](./ORGANIZATION_SUMMARY.md) for details on how the documentation was organized.
 
 ---
 
-## 📚 Architecture Decision Records (ADRs)
+## � Recent Improvements
+
+- **[Environment & Database Setup](./ENV_DOCKER_DATABASE_SUMMARY.md)** - Comprehensive setup improvements (Oct 19, 2025)
+
+## �📚 Architecture Decision Records (ADRs)
 
 ADRs document significant architectural and implementation decisions. Read these to understand **why** the codebase is structured the way it is.
 

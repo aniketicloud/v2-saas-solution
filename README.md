@@ -71,8 +71,20 @@ After the database is running, apply the Prisma migrations:
 ```bash
 npx prisma migrate dev
 # or
-pnpm prisma migrate dev
+pnpm db:migrate
 ```
+
+### Seed the Database
+
+Seed the database with initial test users:
+
+```bash
+pnpm db:seed
+```
+
+This creates two test accounts:
+- **Admin**: `admin@email.com` / `11111111`
+- **User**: `user@email.com` / `11111111`
 
 ### Quick Start (Recommended)
 
@@ -80,6 +92,7 @@ Use the setup script to start everything at once:
 
 ```bash
 pnpm db:setup  # Starts Docker and runs migrations
+pnpm db:seed   # Seed test users (optional)
 pnpm dev       # Start the development server
 ```
 
@@ -94,7 +107,10 @@ pnpm docker:up
 # 2. Run database migrations
 pnpm db:migrate
 
-# 3. Start the development server
+# 3. Seed test users (optional)
+pnpm db:seed
+
+# 4. Start the development server
 pnpm dev
 ```
 

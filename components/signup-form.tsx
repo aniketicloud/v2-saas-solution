@@ -43,16 +43,8 @@ export function SignupForm({
 
     setLoading(true);
     try {
-      // Call Better Auth client signUp.email
-      // const { data, error: signUpError } = await authClient.signUp.email({
-      //   email,
-      //   name,
-      //   password,
-      //   // any other fields can be passed here if needed
-      // });
-
-      // create users only through admin endpoint for now
-      const { data, error: signUpError } = await authClient.admin.createUser({
+      // Call Better Auth client signUp.email for public signup
+      const { data, error: signUpError } = await authClient.signUp.email({
         email,
         name,
         password,
@@ -64,10 +56,22 @@ export function SignupForm({
         return;
       }
 
+      // Sign up successful, now sign in the user
+      const { error: signInError } = await authClient.signIn.email({
+        email,
+        password,
+      });
+
+      if (signInError) {
+        setError("Account created but failed to sign in. Please try logging in.");
+        setLoading(false);
+        return;
+      }
+
       // Optimistically refresh the session store so UI updates immediately
       await authClient.getSession();
 
-      // Success — redirect to dashboard (assumption)
+      // Success — redirect to dashboard
       router.push("/dashboard");
     } catch (err: any) {
       setError(err?.message || "An unexpected error occurred");
