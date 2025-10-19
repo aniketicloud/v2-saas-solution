@@ -22,9 +22,14 @@ const segmentLabels: Record<string, string> = {
   edit: "Edit",
 };
 
-// Helper to check if segment looks like an ID (alphanumeric, longer than 10 chars)
+// Helper to check if segment looks like an ID (cuid2 or UUID-like)
 function isIdSegment(segment: string): boolean {
-  return segment.length > 10 && /^[a-zA-Z0-9_-]+$/.test(segment);
+  // Match cuid2 (starts with 'c', 24+ chars, lowercase, numbers, _)
+  if (/^c[a-z0-9]{23,}$/i.test(segment)) return true;
+  // Match UUID v4 (xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx)
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(segment)) return true;
+  // Add more patterns as needed for your ID types
+  return false;
 }
 
 // Helper to convert segment to label
