@@ -141,6 +141,8 @@ export function SignupForm({
           )}
         </Field>
 
+        {/* Forgot password removed per project request */}
+
         <Field>
           <Button type="submit" disabled={isSubmitting} className="w-full">
             {isSubmitting ? (
