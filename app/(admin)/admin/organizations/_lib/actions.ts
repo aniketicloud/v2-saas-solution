@@ -26,7 +26,7 @@ export async function createOrganization(name: string, slug: string) {
   if (!validationResult.success) {
     return {
       success: false,
-      error: validationResult.error.issues.map((e) => e.message).join(", "),
+      error: validationResult.error.issues[0].message, // Return only the first error message
     };
   }
 
@@ -70,7 +70,7 @@ export async function updateOrganization(
   if (!validationResult.success) {
     return {
       success: false,
-      error: validationResult.error.issues.map((e) => e.message).join(", "),
+      error: validationResult.error.issues[0].message, // Return only the first error message
     };
   }
 
