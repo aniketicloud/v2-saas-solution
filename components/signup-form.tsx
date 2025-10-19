@@ -51,9 +51,9 @@ export function SignupForm({
       return;
     }
 
-    // Redirect to dashboard - it will intelligently route to no-organization for new users
+    // Redirect to dashboard - server-side session validation will handle routing
     router.push("/dashboard");
-    router.refresh(); // Refresh to update server components with new session
+    router.refresh();
   };
 
   return (

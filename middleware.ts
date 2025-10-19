@@ -8,34 +8,15 @@ export async function middleware(request: NextRequest) {
   // Check if there's a session cookie
   const sessionCookie = request.cookies.get("better-auth.session_token");
 
-  if (sessionCookie) {
-    // Verify the session is valid by making a request to the session endpoint
-    const [sessionCheck, error] = await tryCatch(
-      fetch(`${request.nextUrl.origin}/api/auth/get-session`, {
-        headers: {
-          cookie: request.headers.get("cookie") || "",
-        },
-      })
+  // If no session cookie exists, redirect protected routes to login
+  if (!sessionCookie) {
+    const protectedPaths = ["/dashboard", "/admin", "/org"];
+    const isProtectedPath = protectedPaths.some((path) =>
+      request.nextUrl.pathname.startsWith(path)
     );
 
-    // If there's an error checking the session or session is invalid, clear the cookie
-    if (error || !sessionCheck?.ok) {
-      if (error) {
-        console.error("Session validation error:", error);
-      }
-
-      // Clear the invalid session cookie
-      response.cookies.delete("better-auth.session_token");
-
-      // If user is trying to access protected routes, redirect to login
-      const protectedPaths = ["/dashboard", "/admin", "/org"];
-      const isProtectedPath = protectedPaths.some((path) =>
-        request.nextUrl.pathname.startsWith(path)
-      );
-
-      if (isProtectedPath) {
-        return NextResponse.redirect(new URL("/auth/login", request.url));
-      }
+    if (isProtectedPath) {
+      return NextResponse.redirect(new URL("/auth/login", request.url));
     }
   }
 
