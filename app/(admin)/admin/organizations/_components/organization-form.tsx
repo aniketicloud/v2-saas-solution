@@ -32,6 +32,7 @@ import { generateSlug } from "../_lib/utils";
 import { organizationSchema, type OrganizationFormData } from "../_lib/schema";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { tryCatch } from "@/utils/try-catch";
 
 interface OrganizationFormProps {
   mode: "create" | "edit";
@@ -86,41 +87,49 @@ export function OrganizationForm({
   };
 
   const onSubmit = async (data: OrganizationFormData) => {
-    try {
-      if (mode === "create") {
-        const result = await createOrganization(data.name, data.slug);
+    if (mode === "create") {
+      const [result, err] = await tryCatch(
+        createOrganization(data.name, data.slug)
+      );
 
-        if (result.success) {
-          toast.success(`Organization "${data.name}" created successfully!`);
-          router.push("/admin/organizations");
-          router.refresh();
-        } else {
-          toast.error(result.error || "Failed to create organization");
-        }
-      } else {
-        // Edit mode
-        if (!organizationId) {
-          toast.error("Organization ID is required for updates");
-          return;
-        }
-
-        const result = await updateOrganization(
-          organizationId,
-          data.name,
-          data.slug
-        );
-
-        if (result.success) {
-          toast.success(`Organization "${data.name}" updated successfully!`);
-          // Redirect back to detail page after successful edit
-          router.push(`/admin/organizations/${organizationId}`);
-          router.refresh();
-        } else {
-          toast.error(result.error || "Failed to update organization");
-        }
+      if (err) {
+        console.error("Create organization error:", err);
+        toast.error("An unexpected error occurred");
+        return;
       }
-    } catch (error) {
-      toast.error("An unexpected error occurred");
+
+      if (result?.success) {
+        toast.success(`Organization "${data.name}" created successfully!`);
+        router.push("/admin/organizations");
+        router.refresh();
+      } else {
+        toast.error(result?.error || "Failed to create organization");
+      }
+    } else {
+      // Edit mode
+      if (!organizationId) {
+        toast.error("Organization ID is required for updates");
+        return;
+      }
+
+      const [result, err] = await tryCatch(
+        updateOrganization(organizationId, data.name, data.slug)
+      );
+
+      if (err) {
+        console.error("Update organization error:", err);
+        toast.error("An unexpected error occurred");
+        return;
+      }
+
+      if (result?.success) {
+        toast.success(`Organization "${data.name}" updated successfully!`);
+        // Redirect back to detail page after successful edit
+        router.push(`/admin/organizations/${organizationId}`);
+        router.refresh();
+      } else {
+        toast.error(result?.error || "Failed to update organization");
+      }
     }
   };
 

@@ -283,7 +283,7 @@ allowUserToCreateOrganization: async (user) => {
 - [ ] Session persists for 7 days (Better Auth default)
 - [ ] Can sign out from any page
 
-**Entry Point**: `/login` → `/org/nike/dashboard`
+**Entry Point**: `/auth/login` → `/org/nike/dashboard`
 
 ---
 

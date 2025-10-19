@@ -15,18 +15,21 @@ import { mockUser, mockOrganization } from "@/lib/mock-data";
 import { Badge } from "@/components/ui/badge";
 import { useRouter } from "next/navigation";
 import { signOut } from "@/lib/auth-client";
+import { tryCatch } from "@/utils/try-catch";
 
 export function DashboardHeader() {
   const router = useRouter();
 
   async function handleLogout() {
-    try {
-      await signOut({
+    const [, signOutError] = await tryCatch(
+      signOut({
         // optionally pass fetchOptions to redirect on server, but we'll client-redirect
-      });
-    } finally {
-      router.push("/login");
-    }
+      })
+    );
+
+    if (signOutError) console.error("Sign out error:", signOutError);
+    router.push("/auth/login");
+    router.refresh();
   }
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">

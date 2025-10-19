@@ -198,7 +198,7 @@ export default async function HomePage() {
   // 1. NOT AUTHENTICATED → Login
   // ============================================
   if (!session?.user) {
-    redirect("/login");
+  redirect("/auth/login");
   }
 
   // ============================================
@@ -348,7 +348,7 @@ export default async function OrganizationLayout({
   const session = await auth.api.getSession({ headers: await headers() });
 
   if (!session?.user) {
-    redirect("/login");
+  redirect("/auth/login");
   }
 
   // ============================================
@@ -594,7 +594,7 @@ export default async function SelectOrganizationPage() {
   const session = await auth.api.getSession({ headers: await headers() });
 
   if (!session?.user) {
-    redirect("/login");
+  redirect("/auth/login");
   }
 
   // Fetch user's organizations
@@ -870,13 +870,13 @@ export function BreadcrumbNav({ organization }: { organization: { name: string; 
 
 | Route Pattern | Access Control | Redirect If Denied |
 |---------------|----------------|-------------------|
-| `/` | None | `/login` if not authenticated |
+| `/` | None | `/auth/login` if not authenticated |
 | `/admin/*` | `User.role === "admin"` | `/unauthorized` |
 | `/org/[slug]/*` | System admin OR member | `/unauthorized` |
 | `/org/[slug]/modules/*` | Module enabled + permissions | 404 |
 | `/org/[slug]/settings/general/edit` | `organization.update` permission | `/org/[slug]/settings/general` |
 | `/org/[slug]/members/invite` | `invitation.create` permission | `/org/[slug]/members` |
-| `/dashboard/*` | Authenticated | `/login` |
+| `/dashboard/*` | Authenticated | `/auth/login` |
 
 ---
 

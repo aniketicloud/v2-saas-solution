@@ -112,7 +112,7 @@ export async function generateMetadata({ params }) {
 **Decision:** Trust the layout's admin role validation, remove duplicate checks from pages.
 
 **Rationale:**
-- Layout already validates: `if (session.user.role !== "admin") redirect("/login")`
+- Layout already validates: `if (session.user.role !== "admin") redirect("/auth/login")`
 - Duplicate checks add unnecessary database queries
 - Single source of truth (DRY principle)
 

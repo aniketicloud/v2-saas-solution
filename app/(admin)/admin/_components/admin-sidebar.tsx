@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { signOut } from "@/lib/auth-client";
+import { tryCatch } from "@/utils/try-catch";
 
 // Menu items
 const navItems = [
@@ -65,11 +66,11 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
   const router = useRouter();
 
   async function handleLogout() {
-    try {
-      await signOut();
-    } finally {
-      router.push("/login");
-    }
+    // Use tryCatch to call signOut and always redirect afterward
+    const [, signOutErr] = await tryCatch(signOut());
+    if (signOutErr) console.error("Sign out error:", signOutErr);
+    router.push("/auth/login");
+    router.refresh();
   }
 
   // Get user initials for avatar fallback

@@ -16,9 +16,9 @@ Implemented a comprehensive role-based access control (RBAC) system that strictl
 **Purpose**: Prevent regular users (even with organizations) from accessing admin routes
 
 ```typescript
-// Before: Redirected to /login (confusing)
+// Before: Redirected to /auth/login (confusing)
 if (session.user.role !== "admin") {
-  redirect("/login");
+  redirect("/auth/login");
 }
 
 // After: Redirects to /unauthorized (clear access denied)
@@ -27,7 +27,7 @@ if (session.user.role !== "admin") {
 }
 ```
 
-**Impact**: Clear separation between "not authenticated" (→ `/login`) and "not authorized" (→ `/unauthorized`)
+**Impact**: Clear separation between "not authenticated" (→ `/auth/login`) and "not authorized" (→ `/unauthorized`)
 
 ---
 
@@ -138,7 +138,7 @@ if (!organizations || organizations.length === 0) {
 | **Admin** | ✅ Allowed | 🔀 → `/admin/dashboard` | 🔀 → `/admin/dashboard` | ❌ N/A |
 | **User with Orgs** | ❌ → `/unauthorized` | ✅ Allowed | ✅ If member | ❌ N/A |
 | **User without Orgs** | ❌ → `/unauthorized` | 🔀 → `/no-organization` | ❌ → `/unauthorized` | ✅ Allowed |
-| **Not Authenticated** | 🔀 → `/login` | 🔀 → `/login` | 🔀 → `/login` | 🔀 → `/login` |
+| **Not Authenticated** | 🔀 → `/auth/login` | 🔀 → `/auth/login` | 🔀 → `/auth/login` | 🔀 → `/auth/login` |
 
 ---
 

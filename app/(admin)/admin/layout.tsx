@@ -25,7 +25,7 @@ export default async function AdminLayout({
 
   // Check if user is authenticated
   if (!session?.user) {
-    redirect("/login");
+    redirect("/auth/login");
   }
 
   // CRITICAL: Only users with admin role can access /admin routes

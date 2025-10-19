@@ -117,7 +117,7 @@ export async function generateMetadata({ params }) {
 **Current:** Redundant checks in every page
 ```tsx
 // Layout already checks admin role
-if (session.user.role !== "admin") redirect("/login")
+if (session.user.role !== "admin") redirect("/auth/login")
 
 // Then EVERY page checks again! (unnecessary)
 const session = await auth.api.getSession({ headers: await headers() })

@@ -18,7 +18,8 @@ import Link from "next/link";
 import { Spinner } from "@/components/ui/spinner";
 import { AlertCircle } from "lucide-react";
 import { loginSchema, type LoginFormData } from "@/lib/schemas/auth";
-import { loginAction } from "@/app/auth/actions";
+import { authClient } from "@/lib/auth-client";
+import { tryCatch } from "@/utils/try-catch";
 
 export function LoginForm({
   className,
@@ -41,11 +42,18 @@ export function LoginForm({
 
   const onSubmit = async (data: LoginFormData) => {
     setServerError(null);
+    const [result, err] = await tryCatch(
+      authClient.signIn.email({ email: data.email, password: data.password })
+    );
 
-    const result = await loginAction(data);
+    if (err) {
+      console.error("Login error:", err);
+      setServerError(err.message || "Invalid email or password");
+      return;
+    }
 
-    if (!result.success) {
-      setServerError(result.error);
+    if (result?.error) {
+      setServerError(result.error.message || "Invalid email or password");
       return;
     }
 

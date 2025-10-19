@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
+import { tryCatch } from "@/utils/try-catch";
 
 export default async function HomePage() {
   // Fetch the current session
@@ -20,22 +21,20 @@ export default async function HomePage() {
 
   // If user has an active organization, redirect to that org's dashboard
   if (session.session.activeOrganizationId) {
-    try {
-      // Fetch the active organization
-      const organization = await auth.api.getFullOrganization({
-        query: {
-          organizationId: session.session.activeOrganizationId,
-        },
+    // Fetch the active organization using tryCatch helper so we avoid try/catch
+    const [organization, orgError] = await tryCatch(
+      auth.api.getFullOrganization({
+        query: { organizationId: session.session.activeOrganizationId },
         headers: await headers(),
-      });
+      })
+    );
 
-      // If organization exists, redirect to its dashboard
-      if (organization?.slug) {
-        redirect(`/org/${organization.slug}/dashboard`);
-      }
-    } catch (error) {
+    if (orgError) {
       // If organization fetch fails, continue to no-organization page
-      console.error("Failed to fetch organization:", error);
+      console.error("Failed to fetch organization:", orgError);
+    } else if (organization?.slug) {
+      // If organization exists, redirect to its dashboard
+      redirect(`/org/${organization.slug}/dashboard`);
     }
   }
 

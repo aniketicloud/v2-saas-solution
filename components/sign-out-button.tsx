@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
+import { tryCatch } from "@/utils/try-catch";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { LogOut } from "lucide-react";
@@ -25,23 +26,22 @@ export function SignOutButton({
 
   const handleSignOut = async () => {
     setIsSigningOut(true);
-    try {
-      await authClient.signOut({
+    const [, err] = await tryCatch(
+      authClient.signOut({
         fetchOptions: {
           onSuccess: () => {
             router.push("/auth/login");
             router.refresh();
           },
         },
-      });
-    } catch (error) {
-      console.error("Sign out error:", error);
-      // Still redirect to login even if there's an error
-      router.push("/auth/login");
-      router.refresh();
-    } finally {
-      setIsSigningOut(false);
-    }
+      })
+    );
+
+    if (err) console.error("Sign out error:", err);
+    // Ensure redirect even if signOut failed
+    router.push("/auth/login");
+    router.refresh();
+    setIsSigningOut(false);
   };
 
   return (

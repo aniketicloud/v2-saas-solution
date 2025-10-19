@@ -15,6 +15,7 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "sonner";
 import { deleteOrganization } from "../../../_lib/actions";
+import { tryCatch } from "@/utils/try-catch";
 
 interface DeleteOrganizationFormProps {
   organization: {
@@ -53,23 +54,25 @@ export function DeleteOrganizationForm({
 
     setIsDeleting(true);
 
-    try {
-      const result = await deleteOrganization(organization.id);
+    const [result, err] = await tryCatch(deleteOrganization(organization.id));
 
-      if (result.success) {
-        toast.success(`Organization "${organization.name}" has been deleted`, {
-          description: `Slug: @${organization.slug} • ${organization.memberCount} members removed`,
-        });
-        router.push("/admin/organizations");
-        router.refresh();
-      } else {
-        toast.error("Failed to delete organization", {
-          description: result.error,
-        });
-        setIsDeleting(false);
-      }
-    } catch (error) {
+    if (err) {
+      console.error("Delete organization error:", err);
       toast.error("An unexpected error occurred");
+      setIsDeleting(false);
+      return;
+    }
+
+    if (result?.success) {
+      toast.success(`Organization "${organization.name}" has been deleted`, {
+        description: `Slug: @${organization.slug} • ${organization.memberCount} members removed`,
+      });
+      router.push("/admin/organizations");
+      router.refresh();
+    } else {
+      toast.error("Failed to delete organization", {
+        description: result?.error,
+      });
       setIsDeleting(false);
     }
   };

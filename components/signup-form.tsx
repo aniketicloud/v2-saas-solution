@@ -18,7 +18,8 @@ import { Spinner } from "@/components/ui/spinner";
 import { AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { signupSchema, type SignupFormData } from "@/lib/schemas/auth";
-import { signupAction } from "@/app/auth/actions";
+import { authClient } from "@/lib/auth-client";
+import { tryCatch } from "@/utils/try-catch";
 
 export function SignupForm({
   className,
@@ -44,10 +45,30 @@ export function SignupForm({
   const onSubmit = async (data: SignupFormData) => {
     setServerError(null);
 
-    const result = await signupAction(data);
+    const [result, err] = await tryCatch(
+      authClient.signUp.email({
+        email: data.email,
+        password: data.password,
+        name: data.name,
+      })
+    );
 
-    if (!result.success) {
-      setServerError(result.error);
+    if (err) {
+      console.error("Signup error:", err);
+      setServerError(err.message || "An unexpected error occurred");
+      return;
+    }
+
+    if (result?.error) {
+      // Check for duplicate email error
+      if (
+        result.error.message?.includes("already exists") ||
+        result.error.message?.includes("duplicate")
+      ) {
+        setServerError("An account with this email already exists");
+      } else {
+        setServerError(result.error.message || "Failed to create account");
+      }
       return;
     }
 

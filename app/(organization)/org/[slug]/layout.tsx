@@ -23,7 +23,7 @@ export default async function OrganizationLayout({
 
   // Check if user is authenticated
   if (!session?.user) {
-    redirect("/login");
+    redirect("/auth/login");
   }
 
   // Redirect admins to admin dashboard
