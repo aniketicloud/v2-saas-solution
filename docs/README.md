@@ -2,13 +2,15 @@
 
 Welcome to the v2-saas-solution documentation. This directory contains all architectural decisions, guides, and historical documentation.
 
-## � Getting Started
+## 🚀 Getting Started
 
 New to the project? Start here:
 
 1. **[Project Setup Guide](./PROJECT_SETUP.md)** - Complete setup instructions
 2. **[Database Seeding](./DATABASE_SEEDING.md)** - Test account creation
-3. **[Copilot Instructions](../.github/copilot-instructions.md)** - Development patterns and conventions
+3. **[Admin User Management](./ADMIN_USER_MANAGEMENT.md)** - Creating and managing admin users
+4. **[Access Control & Authorization](./ACCESS_CONTROL.md)** - Role-based access control system
+5. **[Copilot Instructions](../.github/copilot-instructions.md)** - Development patterns and conventions
 
 ## �📁 Directory Structure
 
@@ -37,8 +39,10 @@ docs/
 
 ---
 
-## � Recent Improvements
+## 🆕 Recent Improvements
 
+- **[Admin User Management](./ADMIN_USER_MANAGEMENT.md)** - Custom admin script for promoting users (Jan 2025)
+- **[Access Control Implementation](./ACCESS_CONTROL.md)** - Role-based access control and authorization system (Jan 2025)
 - **[Environment & Database Setup](./ENV_DOCKER_DATABASE_SUMMARY.md)** - Comprehensive setup improvements (Oct 19, 2025)
 
 ## �📚 Architecture Decision Records (ADRs)

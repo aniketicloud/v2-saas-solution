@@ -2,89 +2,65 @@
 
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Field,
   FieldDescription,
+  FieldError,
   FieldGroup,
   FieldLabel,
-  FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { authClient } from "@/lib/auth-client";
-import { Loader2 } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
+import { AlertCircle } from "lucide-react";
 import Link from "next/link";
+import { signupSchema, type SignupFormData } from "@/lib/schemas/auth";
+import { signupAction } from "@/app/auth/actions";
 
 export function SignupForm({
   className,
   ...props
 }: React.ComponentProps<"form">) {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [serverError, setServerError] = useState<string | null>(null);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError(null);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<SignupFormData>({
+    resolver: zodResolver(signupSchema),
+    defaultValues: {
+      email: "",
+      name: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
 
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters long.");
+  const onSubmit = async (data: SignupFormData) => {
+    setServerError(null);
+
+    const result = await signupAction(data);
+
+    if (!result.success) {
+      setServerError(result.error);
       return;
     }
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.");
-      return;
-    }
 
-    setLoading(true);
-    try {
-      // Call Better Auth client signUp.email for public signup
-      const { data, error: signUpError } = await authClient.signUp.email({
-        email,
-        name,
-        password,
-      });
-
-      if (signUpError) {
-        setError(signUpError.message || "Failed to sign up");
-        setLoading(false);
-        return;
-      }
-
-      // Sign up successful, now sign in the user
-      const { error: signInError } = await authClient.signIn.email({
-        email,
-        password,
-      });
-
-      if (signInError) {
-        setError("Account created but failed to sign in. Please try logging in.");
-        setLoading(false);
-        return;
-      }
-
-      // Optimistically refresh the session store so UI updates immediately
-      await authClient.getSession();
-
-      // Success — redirect to dashboard
-      router.push("/dashboard");
-    } catch (err: any) {
-      setError(err?.message || "An unexpected error occurred");
-    } finally {
-      setLoading(false);
-    }
-  }
+    // Redirect to dashboard - it will intelligently route to no-organization for new users
+    router.push("/dashboard");
+    router.refresh(); // Refresh to update server components with new session
+  };
 
   return (
     <form
       className={cn("flex flex-col gap-6", className)}
-      onSubmit={handleSubmit}
-      aria-busy={loading}
+      onSubmit={handleSubmit(onSubmit)}
+      aria-busy={isSubmitting}
       {...props}
     >
       <FieldGroup>
@@ -94,79 +70,93 @@ export function SignupForm({
             Fill in the form below to create your account
           </p>
         </div>
-        <Field>
+
+        {serverError && (
+          <div className="flex items-center gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+            <AlertCircle className="h-4 w-4 flex-shrink-0" />
+            <span>{serverError}</span>
+          </div>
+        )}
+
+        <Field data-invalid={!!errors.email}>
           <FieldLabel htmlFor="email">Email</FieldLabel>
           <Input
             id="email"
             type="email"
             placeholder="m@example.com"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            disabled={loading}
+            aria-invalid={!!errors.email}
+            disabled={isSubmitting}
+            {...register("email")}
           />
           <FieldDescription>
             We&apos;ll use this to contact you. We will not share your email
             with anyone else.
           </FieldDescription>
+          {errors.email && <FieldError>{errors.email.message}</FieldError>}
         </Field>
-        <Field>
+
+        <Field data-invalid={!!errors.name}>
           <FieldLabel htmlFor="name">Full name</FieldLabel>
           <Input
             id="name"
             type="text"
-            placeholder="Your full name"
-            required
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            disabled={loading}
+            placeholder="John Doe"
+            aria-invalid={!!errors.name}
+            disabled={isSubmitting}
+            {...register("name")}
           />
           <FieldDescription>Please enter your full name.</FieldDescription>
+          {errors.name && <FieldError>{errors.name.message}</FieldError>}
         </Field>
-        <Field>
+
+        <Field data-invalid={!!errors.password}>
           <FieldLabel htmlFor="password">Password</FieldLabel>
           <Input
             id="password"
             type="password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            disabled={loading}
+            aria-invalid={!!errors.password}
+            disabled={isSubmitting}
+            {...register("password")}
           />
           <FieldDescription>
-            Must be at least 8 characters long.
+            Must be at least 8 characters with uppercase, lowercase, and number.
           </FieldDescription>
+          {errors.password && (
+            <FieldError>{errors.password.message}</FieldError>
+          )}
         </Field>
-        <Field>
+
+        <Field data-invalid={!!errors.confirmPassword}>
           <FieldLabel htmlFor="confirm-password">Confirm Password</FieldLabel>
           <Input
             id="confirm-password"
             type="password"
-            required
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            disabled={loading}
+            aria-invalid={!!errors.confirmPassword}
+            disabled={isSubmitting}
+            {...register("confirmPassword")}
           />
           <FieldDescription>Please confirm your password.</FieldDescription>
+          {errors.confirmPassword && (
+            <FieldError>{errors.confirmPassword.message}</FieldError>
+          )}
         </Field>
-        {error && (
-          <div className="text-sm text-destructive text-center">{error}</div>
-        )}
+
         <Field>
-          <Button type="submit" disabled={loading}>
-            {loading ? (
-              <span className="inline-flex items-center gap-2">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Creating...
-              </span>
+          <Button type="submit" disabled={isSubmitting} className="w-full">
+            {isSubmitting ? (
+              <>
+                <Spinner className="mr-2" />
+                Creating account...
+              </>
             ) : (
               "Create Account"
             )}
           </Button>
         </Field>
+
         <FieldDescription className="text-center">
           Already have an account?{" "}
-          <Link href="/login" className="underline underline-offset-4">
+          <Link href="/auth/login" className="underline underline-offset-4">
             Sign in
           </Link>
         </FieldDescription>

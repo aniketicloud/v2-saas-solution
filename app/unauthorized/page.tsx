@@ -1,29 +1,45 @@
 import Link from "next/link";
-import { AlertTriangle } from "lucide-react";
+import { ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function UnauthorizedPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
-      <div className="mx-auto max-w-md text-center">
-        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
-          <AlertTriangle className="h-8 w-8 text-red-600" />
+    <div className="flex min-h-screen items-center justify-center bg-muted/50">
+      <div className="mx-auto max-w-md space-y-6 p-6">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
+          <ShieldAlert className="h-8 w-8 text-destructive" />
         </div>
-        <h1 className="mb-2 text-3xl font-bold text-gray-900">
-          Unauthorized Access
-        </h1>
-        <p className="mb-8 text-gray-600">
-          You don't have permission to access this organization. Please contact
-          an administrator if you believe this is an error.
-        </p>
-        <div className="flex gap-4 justify-center">
+        
+        <div className="space-y-2 text-center">
+          <h1 className="text-3xl font-bold tracking-tight">
+            Access Denied
+          </h1>
+          <p className="text-muted-foreground">
+            You don't have the required permissions to access this resource.
+          </p>
+        </div>
+
+        <div className="rounded-lg border bg-card p-4 space-y-2">
+          <h2 className="font-semibold text-sm">Common reasons:</h2>
+          <ul className="space-y-1 text-sm text-muted-foreground">
+            <li>• You need admin role to access admin routes</li>
+            <li>• You're not a member of this organization</li>
+            <li>• Your account doesn't have sufficient privileges</li>
+          </ul>
+        </div>
+
+        <div className="flex gap-3 justify-center pt-2">
           <Button asChild variant="outline">
-            <Link href="/dashboard">Go to Dashboard</Link>
+            <Link href="/auth/login">Sign In</Link>
           </Button>
           <Button asChild>
-            <Link href="/login">Sign In</Link>
+            <Link href="/dashboard">Go to Dashboard</Link>
           </Button>
         </div>
+
+        <p className="text-xs text-center text-muted-foreground">
+          If you believe this is an error, contact your system administrator.
+        </p>
       </div>
     </div>
   );

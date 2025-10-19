@@ -222,14 +222,14 @@ pnpm db:migrate
 
 ### Testing Authentication
 
-1. Navigate to [http://localhost:3000/login](http://localhost:3000/login)
+1. Navigate to [http://localhost:3000/auth/login](http://localhost:3000/auth/login)
 2. Login with test credentials:
    - Admin: `admin@email.com` / `11111111`
    - User: `user@email.com` / `11111111`
 
 ### Creating New Users
 
-- **Via Signup Page**: [http://localhost:3000/signup](http://localhost:3000/signup)
+- **Via Signup Page**: [http://localhost:3000/auth/signup](http://localhost:3000/auth/signup)
 - **Via Seed Script**: Edit `prisma/seed.ts` and run `pnpm db:seed`
 
 ## Project Structure

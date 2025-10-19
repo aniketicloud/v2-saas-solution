@@ -1,44 +1,44 @@
 import Link from "next/link";
-import { Building2 } from "lucide-react";
+import { FileQuestion } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { SignOutButton } from "@/components/sign-out-button";
 
-export default function OrganizationNotFound() {
+export default function NotFound() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted/50">
       <div className="mx-auto max-w-md space-y-6 p-6">
         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-          <Building2 className="h-8 w-8 text-muted-foreground" />
+          <FileQuestion className="h-8 w-8 text-muted-foreground" />
         </div>
         
         <div className="space-y-2 text-center">
           <h1 className="text-3xl font-bold tracking-tight">
-            Organization Not Found
+            Page Not Found
           </h1>
           <p className="text-muted-foreground">
-            The organization you're looking for doesn't exist, has been removed, or you don't have access to it.
+            The page you're looking for doesn't exist or has been moved.
           </p>
         </div>
 
         <div className="rounded-lg border bg-card p-4 space-y-2">
-          <h2 className="font-semibold text-sm">Possible reasons:</h2>
+          <h2 className="font-semibold text-sm">Common reasons:</h2>
           <ul className="space-y-1 text-sm text-muted-foreground">
-            <li>• The organization slug is incorrect or misspelled</li>
-            <li>• The organization has been deleted</li>
-            <li>• You are not a member of this organization</li>
-            <li>• You haven't been invited to any organizations yet</li>
+            <li>• The URL might be incorrect or outdated</li>
+            <li>• The page may have been removed or renamed</li>
+            <li>• You might not have permission to access this page</li>
           </ul>
         </div>
 
         <div className="flex gap-3 justify-center pt-2">
-          <SignOutButton variant="outline" />
+          <Button asChild variant="outline">
+            <Link href="/auth/login">Home</Link>
+          </Button>
           <Button asChild>
             <Link href="/dashboard">Go to Dashboard</Link>
           </Button>
         </div>
 
         <p className="text-xs text-center text-muted-foreground">
-          If you believe you should have access, contact your organization administrator.
+          Error 404 - If this problem persists, please contact support.
         </p>
       </div>
     </div>

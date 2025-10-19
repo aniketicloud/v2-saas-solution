@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { redirect, notFound } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { OrgNav } from "@/components/org-nav";
+import { tryCatch } from "@/utils/try-catch";
 
 interface Params {
   slug: string;
@@ -30,13 +31,21 @@ export default async function OrganizationLayout({
     redirect("/admin/dashboard");
   }
 
-  // Fetch organization by slug
-  const organization = await auth.api.getFullOrganization({
-    query: {
-      organizationSlug: params.slug,
-    },
-    headers: await headers(),
-  });
+  // Fetch organization by slug with error handling
+  const [organization, error] = await tryCatch(
+    auth.api.getFullOrganization({
+      query: {
+        organizationSlug: params.slug,
+      },
+      headers: await headers(),
+    })
+  );
+
+  // If there's an error fetching the organization, show not found
+  if (error) {
+    console.error("Error fetching organization:", error);
+    notFound();
+  }
 
   // Handle case where organization is not found
   if (!organization) {

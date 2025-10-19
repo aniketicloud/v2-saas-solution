@@ -10,7 +10,7 @@ export default async function HomePage() {
 
   // If no session, redirect to login
   if (!session?.user) {
-    redirect("/login");
+    redirect("/auth/login");
   }
 
   // If user is admin, redirect to admin dashboard

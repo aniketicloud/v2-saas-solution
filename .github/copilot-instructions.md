@@ -26,6 +26,61 @@ Better Auth is a framework-agnostic TypeScript authentication library that provi
 - **Role Checks**: `session.user.role === "admin"` for admin-only features
 - **Organization Access**: `auth.api.getFullOrganization({ query: { organizationSlug }, headers })`
 
+#### Authentication Routes & Forms
+- **Login**: `/auth/login` - Public login page with server-side redirect for authenticated users
+- **Signup**: `/auth/signup` - Public signup page with server-side redirect for authenticated users
+- **Auth Actions**: `app/auth/actions.ts` - Server actions for `loginAction` and `signupAction`
+- **Auth Schemas**: `lib/schemas/auth.ts` - Reusable Zod schemas for validation
+  - `loginSchema` - Email, password, rememberMe
+  - `signupSchema` - Name, email, password, confirmPassword (with strong password requirements)
+  - `userSchema` - Base schema for user creation (reusable in admin/org member features)
+  - `adminUserSchema` - Admin user creation (optional password)
+  - `memberInviteSchema` - Organization member invitation
+
+**CRITICAL**: Never use client-side `authClient.signIn.email()` or `authClient.signUp.email()` in forms. Always use server actions:
+```tsx
+// ❌ Don't do this
+import { authClient } from "@/lib/auth-client";
+await authClient.signIn.email({ email, password });
+
+// ✅ Do this instead
+import { loginAction } from "@/app/auth/actions";
+const result = await loginAction({ email, password });
+```
+
+**Auth Form Pattern**: Use React Hook Form + Zod resolver with server actions
+```tsx
+"use client";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { loginSchema, type LoginFormData } from "@/lib/schemas/auth";
+import { loginAction } from "@/app/auth/actions";
+
+export function LoginForm() {
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+  });
+
+  const onSubmit = async (data: LoginFormData) => {
+    const result = await loginAction(data);
+    if (result.success) {
+      router.push("/dashboard");
+      router.refresh(); // Refresh server components
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <Input {...register("email")} aria-invalid={!!errors.email} />
+      {errors.email && <FieldError>{errors.email.message}</FieldError>}
+      <Button disabled={isSubmitting}>
+        {isSubmitting ? <><Spinner className="mr-2" />Logging in...</> : "Login"}
+      </Button>
+    </form>
+  );
+}
+```
+
 ### Multi-Tenant Architecture
 Three distinct routing patterns with separate layouts:
 1. **Admin**: `app/(admin)/admin/*` - Global admin dashboard (requires `role === "admin"`)

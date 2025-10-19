@@ -7,7 +7,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { CreateOrganizationDialog } from "@/app/dashboard/organizations/_components/CreateOrganizationDialog";
+import { CreateOrganizationButton } from "./create-organization-button";
 
 export function OrganizationsEmpty() {
   return (
@@ -24,7 +24,7 @@ export function OrganizationsEmpty() {
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
-          <CreateOrganizationDialog />
+          <CreateOrganizationButton />
         </EmptyContent>
       </Empty>
     </div>

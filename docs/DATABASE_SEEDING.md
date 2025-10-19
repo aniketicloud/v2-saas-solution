@@ -100,6 +100,17 @@ For production:
 3. Consider using a separate seeding strategy
 4. Remove or disable the seed script in production builds
 
+## Creating Additional Admin Users
+
+The seed script creates one admin user for initial setup. To promote existing users to admin role:
+
+```bash
+# Promote an existing user to admin
+pnpm admin:make user@email.com
+```
+
+See **[Admin User Management](./ADMIN_USER_MANAGEMENT.md)** for complete documentation on creating and managing admin users.
+
 ## Troubleshooting
 
 ### "User already exists" error

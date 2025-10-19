@@ -28,9 +28,10 @@ export default async function AdminLayout({
     redirect("/login");
   }
 
-  // Check if user has admin role
+  // CRITICAL: Only users with admin role can access /admin routes
+  // Regular users, even if they have organizations, cannot access admin routes
   if (session.user.role !== "admin") {
-    redirect("/login");
+    redirect("/unauthorized");
   }
 
   // Get sidebar state from cookies for persistent state

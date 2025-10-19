@@ -18,6 +18,7 @@
     "db:seed": "prisma db seed",
     "db:reset": "prisma migrate reset --force",
     "db:setup": "pnpm docker:up && pnpm db:migrate",
+    "admin:make": "tsx scripts/make-admin.ts",
     "postinstall": "prisma generate --no-hints"
   },
   "dependencies": {

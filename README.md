@@ -5,6 +5,7 @@ A Next.js 15 SaaS starter with multi-tenant organization support, built with App
 ## Features
 
 - 🔐 **Better Auth** - Comprehensive authentication with email/password, sessions, and role-based access
+- 🛡️ **Access Control** - Strict role-based authorization with admin, user, and organization-level permissions
 - 🏢 **Multi-tenant Organizations** - Full organization management with teams and member roles
 - 🎨 **shadcn/ui** - Beautiful, accessible UI components with dark mode support
 - 🗄️ **Prisma** - Type-safe database ORM with PostgreSQL
@@ -86,6 +87,13 @@ This creates two test accounts:
 - **Admin**: `admin@email.com` / `11111111`
 - **User**: `user@email.com` / `11111111`
 
+**Note**: To promote existing users to admin, use the admin script:
+```bash
+pnpm admin:make user@email.com
+```
+
+See [Admin User Management](./docs/ADMIN_USER_MANAGEMENT.md) for more details.
+
 ### Quick Start (Recommended)
 
 Use the setup script to start everything at once:
@@ -139,10 +147,12 @@ Comprehensive project documentation is available in the [`docs/`](./docs) folder
 
 - **[Architecture Decision Records (ADRs)](./docs/adr/)** - Architectural decisions and rationale
 - **[Implementation Guides](./docs/guides/)** - Step-by-step guides for common tasks
+- **[Access Control & Authorization](./docs/ACCESS_CONTROL.md)** - Role-based access control system
 - **[Documentation Index](./docs/README.md)** - Complete documentation overview
 
 ### Quick Links
 
+- [Access Control Guide](./docs/ACCESS_CONTROL.md) - Authorization rules and user journeys
 - [Organizations Module Structure](./docs/adr/ADR-001-admin-organizations-restructuring.md)
 - [Navigation Best Practices](./docs/adr/ADR-002-admin-portal-home-navigation.md)
 - [Next.js 15 Patterns](./docs/adr/ADR-004-next-js-15-params-and-ux-fixes.md)
