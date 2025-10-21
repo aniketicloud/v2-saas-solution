@@ -1,15 +1,19 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
+import { tryCatch } from "@/utils/try-catch";
 
 export default async function DashboardRedirect() {
-  // Get the current session
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  // Get headers once to reuse
+  const headersList = await headers();
 
-  // If not authenticated, redirect to login
-  if (!session?.user) {
+  // Get session with error handling
+  const [session, sessionError] = await tryCatch(
+    auth.api.getSession({ headers: headersList })
+  );
+
+  // If session fetch failed or no user, redirect to login
+  if (sessionError || !session?.user) {
     redirect("/auth/login");
   }
 
@@ -18,16 +22,16 @@ export default async function DashboardRedirect() {
     redirect("/admin/dashboard");
   }
 
-  // For regular users, check if they have any organizations
-  const organizations = await auth.api.listOrganizations({
-    headers: await headers(),
-  });
+  // Get organizations with error handling
+  const [organizations, orgsError] = await tryCatch(
+    auth.api.listOrganizations({ headers: headersList })
+  );
 
-  // If user has no organizations, show no-organization page
-  if (!organizations || organizations.length === 0) {
+  // If organizations fetch failed or empty, show no-organization page
+  if (orgsError || !organizations || organizations.length === 0) {
     redirect("/no-organization");
   }
 
-  // If user has organizations, redirect to their first organization
+  // Redirect to first organization
   redirect(`/org/${organizations[0].slug}/dashboard`);
 }
