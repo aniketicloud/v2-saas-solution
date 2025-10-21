@@ -3,7 +3,13 @@
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { tryCatch } from "@/utils/try-catch";
-import { loginSchema, signupSchema, type LoginFormData, type SignupFormData } from "@/lib/schemas/auth";
+import {
+  loginSchema,
+  signupSchema,
+  type LoginFormData,
+  type SignupFormData,
+} from "@/lib/schemas/auth";
+import { ZodError } from "zod";
 
 /**
  * Server action for user login
@@ -36,19 +42,20 @@ export async function loginAction(data: LoginFormData) {
       success: true,
       data: result,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Handle Zod validation errors
-    if (error.name === "ZodError") {
+    if (error instanceof ZodError) {
       return {
         success: false,
-        error: error.errors.map((e: any) => e.message).join(", "),
+        error: error.issues[0]?.message || "Validation error",
       };
     }
 
     console.error("Unexpected login error:", error);
     return {
       success: false,
-      error: error.message || "An unexpected error occurred",
+      error:
+        error instanceof Error ? error.message : "An unexpected error occurred",
     };
   }
 }
@@ -64,7 +71,7 @@ export async function signupAction(data: SignupFormData) {
     const validatedData = signupSchema.parse(data);
 
     // Step 1: Create the user account
-    const [signupResult, signupError] = await tryCatch(
+    const [, signupError] = await tryCatch(
       auth.api.signUpEmail({
         body: {
           email: validatedData.email,
@@ -77,10 +84,12 @@ export async function signupAction(data: SignupFormData) {
 
     if (signupError) {
       console.error("Signup error:", signupError);
-      
+
       // Check for duplicate email error
-      if (signupError.message?.includes("already exists") || 
-          signupError.message?.includes("duplicate")) {
+      if (
+        signupError.message?.includes("already exists") ||
+        signupError.message?.includes("duplicate")
+      ) {
         return {
           success: false,
           error: "An account with this email already exists",
@@ -108,7 +117,8 @@ export async function signupAction(data: SignupFormData) {
       console.error("Auto-signin error after signup:", signinError);
       return {
         success: false,
-        error: "Account created successfully, but failed to sign in. Please try logging in manually.",
+        error:
+          "Account created successfully, but failed to sign in. Please try logging in manually.",
       };
     }
 
@@ -116,19 +126,20 @@ export async function signupAction(data: SignupFormData) {
       success: true,
       data: signinResult,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Handle Zod validation errors
-    if (error.name === "ZodError") {
+    if (error instanceof ZodError) {
       return {
         success: false,
-        error: error.errors.map((e: any) => e.message).join(", "),
+        error: error.issues[0]?.message || "Validation error",
       };
     }
 
     console.error("Unexpected signup error:", error);
     return {
       success: false,
-      error: error.message || "An unexpected error occurred",
+      error:
+        error instanceof Error ? error.message : "An unexpected error occurred",
     };
   }
 }
