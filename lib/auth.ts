@@ -2,6 +2,7 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "@/lib/prisma";
 import { admin, organization } from "better-auth/plugins";
+import { nextCookies } from "better-auth/next-js";
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -27,5 +28,7 @@ export const auth = betterAuth({
         allowRemovingAllTeams: false,
       },
     }),
+
+    nextCookies(), // make sure this is the last plugin in the array
   ],
 });
