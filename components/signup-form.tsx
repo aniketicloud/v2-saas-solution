@@ -109,10 +109,6 @@ export function SignupForm({
             disabled={isSubmitting}
             {...register("email")}
           />
-          <FieldDescription>
-            We&apos;ll use this to contact you. We will not share your email
-            with anyone else.
-          </FieldDescription>
           {errors.email && <FieldError>{errors.email.message}</FieldError>}
         </Field>
 
@@ -126,7 +122,6 @@ export function SignupForm({
             disabled={isSubmitting}
             {...register("name")}
           />
-          <FieldDescription>Please enter your full name.</FieldDescription>
           {errors.name && <FieldError>{errors.name.message}</FieldError>}
         </Field>
 
@@ -139,9 +134,6 @@ export function SignupForm({
             disabled={isSubmitting}
             {...register("password")}
           />
-          <FieldDescription>
-            Must be at least 8 characters with uppercase, lowercase, and number.
-          </FieldDescription>
           {errors.password && (
             <FieldError>{errors.password.message}</FieldError>
           )}
@@ -156,7 +148,6 @@ export function SignupForm({
             disabled={isSubmitting}
             {...register("confirmPassword")}
           />
-          <FieldDescription>Please confirm your password.</FieldDescription>
           {errors.confirmPassword && (
             <FieldError>{errors.confirmPassword.message}</FieldError>
           )}
