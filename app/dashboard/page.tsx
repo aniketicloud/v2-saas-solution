@@ -2,20 +2,14 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { tryCatch } from "@/utils/try-catch";
+import { requireSession } from "@/lib/session";
 
 export default async function DashboardRedirect() {
   // Get headers once to reuse
   const headersList = await headers();
 
-  // Get session with error handling
-  const [session, sessionError] = await tryCatch(
-    auth.api.getSession({ headers: headersList })
-  );
-
-  // If session fetch failed or no user, redirect to login
-  if (sessionError || !session?.user) {
-    redirect("/auth/login");
-  }
+  // Ensure the user is signed in (redirects to /auth/login if not)
+  const session = await requireSession({ headers: headersList });
 
   // If admin, redirect to admin dashboard
   if (session.user.role === "admin") {

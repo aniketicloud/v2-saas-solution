@@ -1,5 +1,5 @@
 import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
+import { requireAdmin } from "@/lib/session";
 import { Building2, Users, Activity } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/page-header";
@@ -13,10 +13,8 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminDashboardPage() {
-  // Fetch session to get admin user details
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  // Ensure admin session (will redirect if not admin)
+  const session = await requireAdmin({ headers: await headers() });
 
   // Mock data for statistics (to be replaced with real data later)
   const stats = {

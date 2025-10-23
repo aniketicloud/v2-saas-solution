@@ -1,9 +1,7 @@
 import type React from "react";
 import { headers } from "next/headers";
-import { redirect, notFound } from "next/navigation";
-import { auth } from "@/lib/auth";
 import { OrgNav } from "@/components/org-nav";
-import { tryCatch } from "@/utils/try-catch";
+import { requireOrgMember } from "@/lib/session";
 
 interface Params {
   slug: string;
@@ -16,60 +14,12 @@ export default async function OrganizationLayout({
   children: React.ReactNode;
   params: Params;
 }) {
-  // Get the current session
-  const session = await auth.api.getSession({
-    headers: await headers(),
+  // Use helper to ensure session + membership and set active org as needed
+  const headersList = await headers();
+  const { session, organization } = await requireOrgMember({
+    headers: headersList,
+    slug: params.slug,
   });
-
-  // Check if user is authenticated
-  if (!session?.user) {
-    redirect("/auth/login");
-  }
-
-  // Redirect admins to admin dashboard
-  if (session.user.role === "admin") {
-    redirect("/admin/dashboard");
-  }
-
-  // Fetch organization by slug with error handling
-  const [organization, error] = await tryCatch(
-    auth.api.getFullOrganization({
-      query: {
-        organizationSlug: params.slug,
-      },
-      headers: await headers(),
-    })
-  );
-
-  // If there's an error fetching the organization, show not found
-  if (error) {
-    console.error("Error fetching organization:", error);
-    notFound();
-  }
-
-  // Handle case where organization is not found
-  if (!organization) {
-    notFound();
-  }
-
-  // Check if user is a member of the organization
-  const isMember = organization.members?.some(
-    (member) => member.userId === session.user.id
-  );
-
-  if (!isMember) {
-    redirect("/unauthorized");
-  }
-
-  // Set as active organization if not already active
-  if (session.session.activeOrganizationId !== organization.id) {
-    await auth.api.setActiveOrganization({
-      body: {
-        organizationId: organization.id,
-      },
-      headers: await headers(),
-    });
-  }
 
   return (
     <div className="flex h-screen bg-gray-50">

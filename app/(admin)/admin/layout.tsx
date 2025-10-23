@@ -1,7 +1,5 @@
 import type React from "react";
 import { headers, cookies } from "next/headers";
-import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
 import { AdminSidebar } from "./_components/admin-sidebar";
 import { AdminBreadcrumb } from "./_components/admin-breadcrumb";
 import {
@@ -18,21 +16,10 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Get the current session
-  const session = await auth.api.getSession({
+  // Ensure we have an admin session
+  const session = await (await import("@/lib/session")).requireAdmin({
     headers: await headers(),
   });
-
-  // Check if user is authenticated
-  if (!session?.user) {
-    redirect("/auth/login");
-  }
-
-  // CRITICAL: Only users with admin role can access /admin routes
-  // Regular users, even if they have organizations, cannot access admin routes
-  if (session.user.role !== "admin") {
-    redirect("/unauthorized");
-  }
 
   // Get sidebar state from cookies for persistent state
   const cookieStore = await cookies();
