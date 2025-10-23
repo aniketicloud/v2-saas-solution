@@ -19,7 +19,7 @@ export async function middleware(request: NextRequest) {
   // If not authenticated, redirect to sign page
   if (!sessionCookie) {
     const url = request.nextUrl.clone();
-    url.pathname = "/auth/sign";
+    url.pathname = "/auth/login";
     return NextResponse.redirect(url);
   }
 

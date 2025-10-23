@@ -24,10 +24,15 @@ const segmentLabels: Record<string, string> = {
 
 // Helper to check if segment looks like an ID (cuid2 or UUID-like)
 function isIdSegment(segment: string): boolean {
-  // Match cuid2 (starts with 'c', 24+ chars, lowercase, numbers, _)
-  if (/^c[a-z0-9]{23,}$/i.test(segment)) return true;
+  // Match cuid2 or similar ID (starts with letter, 20+ chars, letters and numbers)
+  if (/^[a-z0-9]{20,}$/i.test(segment)) return true;
   // Match UUID v4 (xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx)
-  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(segment)) return true;
+  if (
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+      segment
+    )
+  )
+    return true;
   // Add more patterns as needed for your ID types
   return false;
 }
@@ -39,7 +44,7 @@ function getSegmentLabel(segment: string, prevSegment?: string): string {
     return segmentLabels[segment];
   }
 
-  // If it looks like an ID and previous segment was "organizations", label it as "Details"
+  // If it looks like an ID and previous segment was "organizations", label it as "Organization Details"
   if (isIdSegment(segment) && prevSegment === "organizations") {
     return "Organization Details";
   }
