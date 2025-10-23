@@ -78,29 +78,49 @@ export async function updateOrganization(
   // Use Prisma directly (common pattern for custom operations)
   const { prisma } = await import("@/lib/prisma");
 
-  // Check if slug is already taken by another organization
-  const [existingOrg, checkError] = await tryCatch(
-    prisma.organization.findFirst({
-      where: {
-        slug: validationResult.data.slug,
-        NOT: { id },
-      },
+  // Get current organization slug
+  const [currentOrg, fetchError] = await tryCatch(
+    prisma.organization.findUnique({
+      where: { id },
+      select: { slug: true },
     })
   );
 
-  if (checkError) {
-    console.error("Error checking slug uniqueness:", checkError);
+  if (fetchError) {
+    console.error("Error fetching organization:", fetchError);
     return {
       success: false,
-      error: "Failed to validate organization slug",
+      error: "Failed to fetch organization details",
     };
   }
 
-  if (existingOrg) {
+  if (!currentOrg) {
     return {
       success: false,
-      error: "An organization with this slug already exists",
+      error: "Organization not found",
     };
+  }
+
+  // Check if slug is already taken by another organization
+  if (validationResult.data.slug !== currentOrg.slug) {
+    const [checkData, checkError] = await tryCatch(
+      auth.api.checkOrganizationSlug({
+        body: { slug: validationResult.data.slug },
+        headers: await headers(),
+      })
+    );
+
+    if (checkError) {
+      console.error("Error checking slug availability:", checkError);
+      return { success: false, error: "Failed to validate organization slug" };
+    }
+
+    if (!checkData.status) {
+      return {
+        success: false,
+        error: "An organization with this slug already exists",
+      };
+    }
   }
 
   // Update the organization
