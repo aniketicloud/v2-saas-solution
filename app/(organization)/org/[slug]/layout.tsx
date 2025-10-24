@@ -12,13 +12,15 @@ export default async function OrganizationLayout({
   params,
 }: {
   children: React.ReactNode;
-  params: Params;
+  params: Promise<Params>;
 }) {
   // Use helper to ensure session + membership and set active org as needed
   const headersList = await headers();
+  // In Next.js 16 params are a Promise — await to access path params
+  const resolvedParams = await params;
   const { session, organization } = await requireOrgMember({
     headers: headersList,
-    slug: params.slug,
+    slug: resolvedParams.slug,
   });
 
   return (
