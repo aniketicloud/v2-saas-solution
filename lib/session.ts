@@ -56,12 +56,7 @@ export async function requireOrgMember({
   // Redirect or 404 on failure; set active organization on success.
   const session = await requireSession({ headers });
 
-  // Admins belong to admin area; redirect them out
-  if (session.user.role === "admin") {
-    redirect("/admin/dashboard");
-  }
-
-  // Fetch the full organization and ensure it exists and the user is a member
+  // Fetch the full organization and ensure it exists
   const [organization, error] = await tryCatch(
     auth.api.getFullOrganization({
       query: { organizationSlug: slug },
@@ -86,7 +81,8 @@ export async function requireOrgMember({
     (member: { userId: string }) => member.userId === session.user.id
   );
 
-  if (!isMember) {
+  // Global admins can access any organization, regular users must be members
+  if (!isMember && session.user.role !== "admin") {
     redirect("/unauthorized");
   }
 

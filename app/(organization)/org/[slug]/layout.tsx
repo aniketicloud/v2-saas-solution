@@ -1,7 +1,16 @@
 import type React from "react";
-import { headers } from "next/headers";
-import { OrgNav } from "@/components/org-nav";
+import { headers, cookies } from "next/headers";
+import { OrgSidebar } from "./_components/org-sidebar";
+import { OrgBreadcrumb } from "@/components/org-breadcrumb";
 import { requireOrgMember } from "@/lib/session";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
+import { Separator } from "@/components/ui/separator";
+import { ThemeSwitcher } from "@/components/theme-switcher";
+import { ColorPaletteSelector } from "@/components/color-palette-selector";
 
 interface Params {
   slug: string;
@@ -23,17 +32,30 @@ export default async function OrganizationLayout({
     slug: resolvedParams.slug,
   });
 
-  return (
-    <div className="flex h-screen bg-gray-50">
-      {/* Left Sidebar */}
-      <aside className="w-64 bg-gray-900 text-white">
-        <OrgNav organization={organization} user={session.user} />
-      </aside>
+  // Get sidebar state from cookies for persistent state
+  const cookieStore = await cookies();
+  const defaultOpen = cookieStore.get("sidebar_state")?.value !== "false";
 
-      {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto p-8">
-        {children}
-      </main>
-    </div>
+  return (
+    <SidebarProvider defaultOpen={defaultOpen}>
+      <OrgSidebar organization={organization} user={session.user} />
+      <SidebarInset>
+        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+          <SidebarTrigger className="-ml-1" />
+          <Separator orientation="vertical" className="mr-2 h-4" />
+          <OrgBreadcrumb
+            organizationSlug={organization.slug}
+            organizationName={organization.name}
+          />
+          <div className="ml-auto flex items-center gap-1">
+            <ColorPaletteSelector />
+            <ThemeSwitcher />
+          </div>
+        </header>
+        <div className="flex flex-1 flex-col gap-4 p-4">
+          <div className="mx-auto w-full max-w-7xl">{children}</div>
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }

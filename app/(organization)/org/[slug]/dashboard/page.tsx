@@ -3,15 +3,20 @@ import { auth } from "@/lib/auth";
 import { Users, FolderKanban, Activity, TrendingUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-interface Params {
-  slug: string;
+interface OrgDashboardProps {
+  params: Promise<{
+    slug: string;
+  }>;
 }
 
-export default async function OrgDashboard({ params }: { params: Params }) {
+export default async function OrgDashboard({ params }: OrgDashboardProps) {
+  // Await params (Next.js 15 requirement)
+  const { slug } = await params;
+
   // Fetch full organization data
   const organization = await auth.api.getFullOrganization({
     query: {
-      organizationSlug: params.slug,
+      organizationSlug: slug,
     },
     headers: await headers(),
   });
@@ -40,21 +45,45 @@ export default async function OrgDashboard({ params }: { params: Params }) {
 
   // Mock data for recent activity
   const recentActivity = [
-    { id: "1", user: "John Doe", action: "joined the organization", time: "2 hours ago" },
-    { id: "2", user: "Jane Smith", action: "created a new project", time: "5 hours ago" },
-    { id: "3", user: "Bob Johnson", action: "updated team settings", time: "1 day ago" },
-    { id: "4", user: "Alice Williams", action: "invited new members", time: "2 days ago" },
+    {
+      id: "1",
+      user: "John Doe",
+      action: "joined the organization",
+      time: "2 hours ago",
+    },
+    {
+      id: "2",
+      user: "Jane Smith",
+      action: "created a new project",
+      time: "5 hours ago",
+    },
+    {
+      id: "3",
+      user: "Bob Johnson",
+      action: "updated team settings",
+      time: "1 day ago",
+    },
+    {
+      id: "4",
+      user: "Alice Williams",
+      action: "invited new members",
+      time: "2 days ago",
+    },
   ];
 
   return (
     <div className="space-y-8">
       {/* Page Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">{organization?.name}</h1>
+        <h1 className="text-3xl font-bold text-gray-900">
+          {organization?.name}
+        </h1>
         <div className="flex items-center gap-4 mt-2">
           <p className="text-gray-600">
             Your role:{" "}
-            <span className="font-medium capitalize">{activeMember?.role || "member"}</span>
+            <span className="font-medium capitalize">
+              {activeMember?.role || "member"}
+            </span>
           </p>
           <span className="text-gray-400">•</span>
           <p className="text-gray-600">
@@ -81,7 +110,9 @@ export default async function OrgDashboard({ params }: { params: Params }) {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Projects</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Active Projects
+            </CardTitle>
             <FolderKanban className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -121,7 +152,9 @@ export default async function OrgDashboard({ params }: { params: Params }) {
                   className="flex items-center justify-between p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
                 >
                   <div className="flex-1">
-                    <h3 className="font-medium text-gray-900">{project.name}</h3>
+                    <h3 className="font-medium text-gray-900">
+                      {project.name}
+                    </h3>
                     <p className="text-sm text-gray-600 mt-1">
                       {project.members} members
                     </p>
@@ -161,7 +194,9 @@ export default async function OrgDashboard({ params }: { params: Params }) {
                       <span className="font-medium">{activity.user}</span>{" "}
                       {activity.action}
                     </p>
-                    <p className="text-xs text-gray-500 mt-1">{activity.time}</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {activity.time}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -179,19 +214,27 @@ export default async function OrgDashboard({ params }: { params: Params }) {
           <div className="grid gap-4 md:grid-cols-4">
             <button className="flex flex-col items-center justify-center p-4 rounded-lg border-2 border-dashed border-gray-300 hover:border-gray-400 hover:bg-gray-50 transition-colors">
               <Users className="h-6 w-6 text-gray-600 mb-2" />
-              <span className="text-sm font-medium text-gray-700">Invite Members</span>
+              <span className="text-sm font-medium text-gray-700">
+                Invite Members
+              </span>
             </button>
             <button className="flex flex-col items-center justify-center p-4 rounded-lg border-2 border-dashed border-gray-300 hover:border-gray-400 hover:bg-gray-50 transition-colors">
               <FolderKanban className="h-6 w-6 text-gray-600 mb-2" />
-              <span className="text-sm font-medium text-gray-700">New Project</span>
+              <span className="text-sm font-medium text-gray-700">
+                New Project
+              </span>
             </button>
             <button className="flex flex-col items-center justify-center p-4 rounded-lg border-2 border-dashed border-gray-300 hover:border-gray-400 hover:bg-gray-50 transition-colors">
               <Users className="h-6 w-6 text-gray-600 mb-2" />
-              <span className="text-sm font-medium text-gray-700">Create Team</span>
+              <span className="text-sm font-medium text-gray-700">
+                Create Team
+              </span>
             </button>
             <button className="flex flex-col items-center justify-center p-4 rounded-lg border-2 border-dashed border-gray-300 hover:border-gray-400 hover:bg-gray-50 transition-colors">
               <Activity className="h-6 w-6 text-gray-600 mb-2" />
-              <span className="text-sm font-medium text-gray-700">View Reports</span>
+              <span className="text-sm font-medium text-gray-700">
+                View Reports
+              </span>
             </button>
           </div>
         </CardContent>

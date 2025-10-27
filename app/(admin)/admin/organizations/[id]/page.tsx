@@ -12,6 +12,9 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { getOrganizationWithDetails } from "../_lib/queries";
+import { getOrganizationMembersForAdmin } from "@/lib/members";
+import { MembersTable } from "@/components/members-table";
+import { AddMemberDialog } from "@/components/add-member-dialog";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
@@ -39,6 +42,9 @@ export default async function AdminOrganizationDetailPage({
   if (!organization) {
     notFound();
   }
+
+  // Fetch members (admin can always access)
+  const members = await getOrganizationMembersForAdmin(id);
 
   // Format date
   const createdDate = new Date(organization.createdAt).toLocaleDateString(
@@ -164,16 +170,30 @@ export default async function AdminOrganizationDetailPage({
         </Card>
       </div>
 
-      {/* Members Section - Coming Soon */}
+      {/* Members Section */}
       <Card>
         <CardHeader>
-          <CardTitle>Members</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Members ({members?.length || 0})
+            </CardTitle>
+            <AddMemberDialog organizationId={organization.id} />
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-8 text-muted-foreground">
-            <Users className="h-12 w-12 mx-auto mb-3 opacity-50" />
-            <p className="text-sm">Member management coming soon</p>
-          </div>
+          {members && members.length > 0 ? (
+            <MembersTable
+              members={members}
+              organizationId={organization.id}
+              canEdit={true} // Admin can always edit
+            />
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              <Users className="h-12 w-12 mx-auto mb-3 opacity-50" />
+              <p className="text-sm">No members found</p>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

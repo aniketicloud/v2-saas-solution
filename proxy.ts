@@ -53,7 +53,7 @@ export async function proxy(request: NextRequest) {
     headers: await headers(),
   });
 
-  // If not authenticated, redirect to sign page
+  // If not authenticated, redirect to login page
   if (!session?.user) {
     return NextResponse.redirect(new URL(AUTH_LOGIN, request.url));
   }
