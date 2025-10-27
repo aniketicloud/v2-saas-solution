@@ -8,7 +8,11 @@ interface RequireSessionOpts {
   redirectTo?: string;
 }
 
-export async function requireSession({ headers, redirectTo = "/auth/login" }: RequireSessionOpts) {
+export async function requireSession({
+  headers,
+  redirectTo = "/auth/login",
+}: RequireSessionOpts) {
+  // Ensure a valid session exists; otherwise redirect to login
   const session = await auth.api.getSession({ headers });
 
   if (!session?.user) {
@@ -18,7 +22,11 @@ export async function requireSession({ headers, redirectTo = "/auth/login" }: Re
   return session;
 }
 
-export async function redirectIfAuthenticated({ headers, redirectTo = "/dashboard" }: RequireSessionOpts) {
+export async function redirectIfAuthenticated({
+  headers,
+  redirectTo = "/dashboard",
+}: RequireSessionOpts) {
+  // If the user is already authenticated, redirect them (used on auth pages)
   const session = await auth.api.getSession({ headers });
 
   if (session?.user) {
@@ -27,6 +35,7 @@ export async function redirectIfAuthenticated({ headers, redirectTo = "/dashboar
 }
 
 export async function requireAdmin({ headers }: { headers: Headers }) {
+  // Require an authenticated admin user; otherwise redirect to unauthorized
   const session = await requireSession({ headers });
 
   if (session.user.role !== "admin") {
@@ -43,7 +52,8 @@ export async function requireOrgMember({
   headers: Headers;
   slug: string;
 }) {
-  // Ensure we have a valid session first
+  // Ensure the user is a member of the organization identified by slug.
+  // Redirect or 404 on failure; set active organization on success.
   const session = await requireSession({ headers });
 
   // Admins belong to admin area; redirect them out
@@ -62,7 +72,11 @@ export async function requireOrgMember({
   if (error || !organization) {
     // Log API errors for debugging
     if (error instanceof APIError) {
-      console.error("Error fetching organization:", error.message, error.status);
+      console.error(
+        "Error fetching organization:",
+        error.message,
+        error.status
+      );
     }
     // Organization not found or fetch error -> 404
     notFound();
