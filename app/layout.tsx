@@ -3,6 +3,7 @@ import { DM_Sans, Space_Mono, Libre_Baskerville, Lora, IBM_Plex_Mono } from "nex
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
+import { ImpersonationBanner } from "@/components/impersonation-banner";
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
@@ -55,6 +56,7 @@ export default function RootLayout({
           enableSystem={false}
           disableTransitionOnChange
         >
+          <ImpersonationBanner />
           {children}
           <Toaster />
         </ThemeProvider>
