@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "sonner";
-import { impersonateUser } from "../../_lib/actions";
+import { authClient } from "@/lib/auth-client";
 import { Eye } from "lucide-react";
 
 interface UserImpersonateButtonProps {
@@ -34,20 +34,22 @@ export function UserImpersonateButton({
   async function handleImpersonate() {
     setIsLoading(true);
     try {
-      const result = await impersonateUser(userId);
+      const { data, error } = await authClient.admin.impersonateUser({
+        userId: userId,
+      });
 
-      if (result.success) {
-        toast.success(`Now impersonating ${userName}`);
-        // Redirect to dashboard as the impersonated user
-        router.push("/dashboard");
-        router.refresh();
-      } else {
-        toast.error(result.error || "Failed to impersonate user");
+      if (error) {
+        toast.error(error.message || "Failed to impersonate user");
+        setIsLoading(false);
+        return;
       }
+
+      toast.success(`Now impersonating ${userName}`);
+      // Use window.location for full page reload to pick up new session
+      window.location.href = "/dashboard";
     } catch (error) {
       toast.error("An error occurred while impersonating");
       console.error(error);
-    } finally {
       setIsLoading(false);
     }
   }
@@ -64,8 +66,9 @@ export function UserImpersonateButton({
         <AlertDialogHeader>
           <AlertDialogTitle>Impersonate User?</AlertDialogTitle>
           <AlertDialogDescription>
-            You will be logged in as {userName}. All actions will be performed as
-            this user until you stop impersonating. Use this feature responsibly.
+            You will be logged in as {userName}. All actions will be performed
+            as this user until you stop impersonating. Use this feature
+            responsibly.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

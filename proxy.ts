@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
+import { tryCatch } from "@/utils/try-catch";
 
 // Define public paths and prefixes in one place for easy updates
 const PUBLIC_EXACT = new Set(["/"]);
@@ -33,9 +34,17 @@ export async function proxy(request: NextRequest) {
 
   // Special case: redirect authenticated users away from auth pages
   if (pathname === AUTH_LOGIN || pathname === AUTH_SIGNUP) {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+    const [session, error] = await tryCatch(
+      auth.api.getSession({
+        headers: await headers(),
+      })
+    );
+
+    if (error) {
+      // If session check fails (e.g., database down), allow access to auth pages
+      console.error("Session check failed in proxy:", error);
+      return NextResponse.next();
+    }
 
     if (session?.user) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
@@ -49,9 +58,18 @@ export async function proxy(request: NextRequest) {
   }
 
   // Check if session exists for protected routes
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const [session, error] = await tryCatch(
+    auth.api.getSession({
+      headers: await headers(),
+    })
+  );
+
+  if (error) {
+    // If session check fails (e.g., database down), let the request through
+    // and let the error boundary handle it
+    console.error("Session check failed in proxy for protected route:", error);
+    return NextResponse.next();
+  }
 
   // If not authenticated, redirect to login page
   if (!session?.user) {
