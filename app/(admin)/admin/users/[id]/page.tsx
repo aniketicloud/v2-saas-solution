@@ -23,6 +23,7 @@ import {
   UserSessionsCard,
   UserImpersonateButton,
   UserDeleteDialog,
+  UserPasswordDialog,
 } from "../_components/user-detail";
 import type { Metadata } from "next";
 
@@ -35,9 +36,11 @@ interface UserDetailPageProps {
   params: Promise<{ id: string }>;
 }
 
-export default async function AdminUserDetailPage({ params }: UserDetailPageProps) {
+export default async function AdminUserDetailPage({
+  params,
+}: UserDetailPageProps) {
   const { id } = await params;
-  
+
   // Ensure admin session
   await requireAdmin({ headers: await headers() });
 
@@ -116,7 +119,9 @@ export default async function AdminUserDetailPage({ params }: UserDetailPageProp
                 Role
               </label>
               <div className="mt-1">
-                <Badge variant={user.role === "admin" ? "default" : "secondary"}>
+                <Badge
+                  variant={user.role === "admin" ? "default" : "secondary"}
+                >
                   {user.role || "user"}
                 </Badge>
               </div>
@@ -194,15 +199,29 @@ export default async function AdminUserDetailPage({ params }: UserDetailPageProp
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-3">
-            <UserImpersonateButton userId={user.id} userName={user.name || user.email} />
-            
+            <UserImpersonateButton
+              userId={user.id}
+              userName={user.name || user.email}
+            />
+
+            <UserPasswordDialog
+              userId={user.id}
+              userName={user.name || user.email}
+            />
+
             {user.banned ? (
               <UserUnbanButton userId={user.id} />
             ) : (
-              <UserBanDialog userId={user.id} userName={user.name || user.email} />
+              <UserBanDialog
+                userId={user.id}
+                userName={user.name || user.email}
+              />
             )}
 
-            <UserDeleteDialog userId={user.id} userName={user.name || user.email} />
+            <UserDeleteDialog
+              userId={user.id}
+              userName={user.name || user.email}
+            />
           </div>
         </CardContent>
       </Card>

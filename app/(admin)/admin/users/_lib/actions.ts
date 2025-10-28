@@ -8,7 +8,7 @@ import { z } from "zod";
 
 /**
  * User Management Server Actions
- * 
+ *
  * Provides comprehensive user management including:
  * - CRUD operations
  * - Ban/Unban users
@@ -27,6 +27,11 @@ const banUserSchema = z.object({
   userId: z.string(),
   reason: z.string().min(1).max(500).optional(),
   expiresIn: z.number().positive().optional(), // in seconds
+});
+
+const setPasswordSchema = z.object({
+  userId: z.string(),
+  newPassword: z.string().min(8, "Password must be at least 8 characters long"),
 });
 
 /**
@@ -294,4 +299,38 @@ export async function stopImpersonation() {
 
   revalidatePath("/admin/users");
   return { success: true };
+}
+
+/**
+ * Set user password
+ * Allows admin to change a user's password
+ */
+export async function setUserPassword(data: z.infer<typeof setPasswordSchema>) {
+  try {
+    const validatedData = setPasswordSchema.parse(data);
+
+    const [result, error] = await tryCatch(
+      auth.api.setUserPassword({
+        body: {
+          userId: validatedData.userId,
+          newPassword: validatedData.newPassword,
+        },
+        headers: await headers(),
+      })
+    );
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath("/admin/users");
+    revalidatePath(`/admin/users/${data.userId}`);
+
+    return { success: true, data: result };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return { success: false, error: error.issues[0]?.message };
+    }
+    return { success: false, error: "Failed to set user password" };
+  }
 }
