@@ -10,6 +10,8 @@ import {
   ChevronUp,
   User2,
   LogOut,
+  CheckSquare,
+  Shield,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -36,6 +38,18 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { signOut } from "@/lib/auth-client";
 import { tryCatch } from "@/utils/try-catch";
+import { Badge } from "@/components/ui/badge";
+
+interface Module {
+  id: string;
+  isEnabled: boolean;
+  module: {
+    id: string;
+    name: string;
+    slug: string;
+    icon?: string | null;
+  };
+}
 
 interface OrgSidebarProps {
   organization: {
@@ -48,9 +62,18 @@ interface OrgSidebarProps {
     email: string;
     image?: string | null;
   };
+  modules?: Module[];
 }
 
-export function OrgSidebar({ organization, user }: OrgSidebarProps) {
+const iconMap: Record<string, any> = {
+  CheckSquare,
+  Settings,
+  Users,
+  LayoutDashboard,
+  UsersRound,
+};
+
+export function OrgSidebar({ organization, user, modules = [] }: OrgSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const baseUrl = `/org/${organization.slug}`;
@@ -65,6 +88,11 @@ export function OrgSidebar({ organization, user }: OrgSidebarProps) {
       title: "Members",
       url: `${baseUrl}/members`,
       icon: Users,
+    },
+    {
+      title: "Roles & Permissions",
+      url: `${baseUrl}/roles`,
+      icon: Shield,
     },
     {
       title: "Teams",
@@ -158,6 +186,39 @@ export function OrgSidebar({ organization, user }: OrgSidebarProps) {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {/* Modules Section */}
+        {modules.length > 0 && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Modules</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {modules
+                  .filter((m) => m.isEnabled)
+                  .map((module) => {
+                    const moduleUrl = `${baseUrl}/${module.module.slug}`;
+                    const isActive =
+                      pathname === moduleUrl ||
+                      pathname.startsWith(`${moduleUrl}/`);
+                    const Icon = module.module.icon
+                      ? iconMap[module.module.icon] || CheckSquare
+                      : CheckSquare;
+
+                    return (
+                      <SidebarMenuItem key={module.id}>
+                        <SidebarMenuButton asChild isActive={isActive}>
+                          <Link href={moduleUrl}>
+                            <Icon className="size-4" />
+                            <span>{module.module.name}</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    );
+                  })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
 
       <SidebarFooter>

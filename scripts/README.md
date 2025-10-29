@@ -34,6 +34,92 @@ pnpm admin:make john@company.com
 
 ---
 
+### 🌱 seed-todolist-module.ts
+
+**Purpose**: Create the TodoList module in the database
+
+**Usage**:
+```bash
+npx tsx scripts/seed-todolist-module.ts
+```
+
+**What it does**:
+1. Creates TodoList module
+2. Sets up module metadata
+3. Prepares module for organization assignment
+
+---
+
+### 🔐 seed-todolist-permissions.ts
+
+**Purpose**: Populate TodoList module permissions
+
+**Usage**:
+```bash
+npx tsx scripts/seed-todolist-permissions.ts
+```
+
+**Documentation**: See [Permission System](../docs/PERMISSIONS_SYSTEM.md)
+
+**Requirements**:
+- TodoList module must exist (run `seed-todolist-module.ts` first)
+
+**What it does**:
+1. Creates 10 module permissions:
+   - `todolist`: view, create, update, delete, manage
+   - `todoitem`: view, create, update, delete, complete
+2. Updates descriptions if permissions already exist
+3. Displays summary of created/updated permissions
+
+---
+
+### 🔄 backfill-predefined-roles.ts
+
+**Purpose**: Create predefined roles for existing organization modules
+
+**Usage**:
+```bash
+npx tsx scripts/backfill-predefined-roles.ts
+```
+
+**When to use**:
+- After upgrading to the new permission system
+- When organization modules exist but don't have predefined roles
+- To ensure all modules have Admin, Editor, Viewer roles
+
+**What it does**:
+1. Finds all organization modules
+2. Checks if they have predefined roles (Admin, Editor, Viewer)
+3. Creates missing roles with appropriate permissions
+4. Displays summary of created roles
+
+**Note**: New module assignments automatically create these roles.
+
+---
+
+### 🧪 test-permissions.ts
+
+**Purpose**: Test and verify the permission system is working
+
+**Usage**:
+```bash
+npx tsx scripts/test-permissions.ts
+```
+
+**What it does**:
+1. Finds an organization with TodoList module
+2. Lists all custom roles and their permissions
+3. Tests permission checks for a member
+4. Displays effective permissions
+5. Verifies hierarchical permission system
+
+**Use this to**:
+- Verify permission system setup
+- Debug permission issues
+- See which permissions are granted to members
+
+---
+
 ## Adding New Scripts
 
 When creating new scripts:

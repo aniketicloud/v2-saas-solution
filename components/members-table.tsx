@@ -36,6 +36,7 @@ import {
   User,
   Trash2,
   UserCog,
+  Eye,
 } from "lucide-react";
 import { useState } from "react";
 import {
@@ -43,7 +44,24 @@ import {
   updateMemberRoleAction,
 } from "@/lib/actions/members";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { toast } from "sonner";
+import { MemberRoleBadges } from "./member-role-badges";
+import { AssignRoleDialog } from "./assign-role-dialog";
+
+interface MemberRole {
+  id: string;
+  customRole: {
+    id: string;
+    name: string;
+    isPredefined: boolean;
+    organizationModule: {
+      module: {
+        name: string;
+      };
+    };
+  };
+}
 
 interface Member {
   id: string;
@@ -57,13 +75,27 @@ interface Member {
     image: string | null;
     createdAt: Date | string;
   };
+  customRoles?: MemberRole[];
+}
+
+interface AvailableRole {
+  id: string;
+  name: string;
+  description: string | null;
+  isPredefined: boolean;
+  module: {
+    id: string;
+    name: string;
+  };
 }
 
 interface MembersTableProps {
   members: Member[];
   organizationId: string;
+  organizationSlug: string;
   canEdit: boolean;
   currentUserId?: string;
+  availableRoles?: AvailableRole[];
 }
 
 const roleConfig = {
@@ -90,8 +122,10 @@ const roleConfig = {
 export function MembersTable({
   members,
   organizationId,
+  organizationSlug,
   canEdit,
   currentUserId,
+  availableRoles = [],
 }: MembersTableProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -100,6 +134,10 @@ export function MembersTable({
     member: Member;
     newRole: "admin" | "member";
   } | null>(null);
+  const [assignRoleDialogOpen, setAssignRoleDialogOpen] = useState(false);
+  const [memberToAssignRole, setMemberToAssignRole] = useState<Member | null>(
+    null
+  );
 
   const handleRemoveMember = async () => {
     if (!memberToRemove) return;
@@ -168,6 +206,7 @@ export function MembersTable({
             <TableRow>
               <TableHead>Member</TableHead>
               <TableHead>Role</TableHead>
+              <TableHead>Custom Roles</TableHead>
               <TableHead>Joined</TableHead>
               {canEdit && <TableHead className="w-[70px]"></TableHead>}
             </TableRow>
@@ -228,6 +267,14 @@ export function MembersTable({
                         {roleInfo.label}
                       </Badge>
                     </TableCell>
+                    <TableCell>
+                      <MemberRoleBadges
+                        memberRoles={member.customRoles || []}
+                        memberId={member.id}
+                        organizationId={organizationId}
+                        canEdit={canEdit}
+                      />
+                    </TableCell>
                     <TableCell className="text-muted-foreground">
                       {formatDate(member.createdAt)}
                     </TableCell>
@@ -243,6 +290,24 @@ export function MembersTable({
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                              <DropdownMenuSeparator />
+                              <Link
+                                href={`/org/${organizationSlug}/members/${member.id}/permissions`}
+                              >
+                                <DropdownMenuItem>
+                                  <Eye className="mr-2 h-4 w-4" />
+                                  View Permissions
+                                </DropdownMenuItem>
+                              </Link>
+                              <DropdownMenuItem
+                                onSelect={() => {
+                                  setMemberToAssignRole(member);
+                                  setAssignRoleDialogOpen(true);
+                                }}
+                              >
+                                <Shield className="mr-2 h-4 w-4" />
+                                Assign Custom Role
+                              </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem
                                 onSelect={() =>
@@ -344,6 +409,24 @@ export function MembersTable({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Assign Role Dialog */}
+      {memberToAssignRole && (
+        <AssignRoleDialog
+          open={assignRoleDialogOpen}
+          onOpenChange={setAssignRoleDialogOpen}
+          member={{
+            id: memberToAssignRole.id,
+            name: memberToAssignRole.user.name,
+            email: memberToAssignRole.user.email,
+          }}
+          availableRoles={availableRoles}
+          assignedRoleIds={
+            memberToAssignRole.customRoles?.map((r) => r.customRole.id) || []
+          }
+          organizationId={organizationId}
+        />
+      )}
     </>
   );
 }

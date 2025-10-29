@@ -8,6 +8,8 @@ import {
   LogOut,
   ChevronUp,
   User2,
+  Blocks,
+  Lock,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -50,6 +52,11 @@ const navItems = [
     title: "Users",
     url: "/admin/users",
     icon: Users,
+  },
+  {
+    title: "Modules",
+    url: "/admin/modules",
+    icon: Blocks,
   },
 ];
 

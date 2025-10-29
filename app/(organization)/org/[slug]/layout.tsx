@@ -11,6 +11,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { ColorPaletteSelector } from "@/components/color-palette-selector";
+import { getOrganizationModules } from "@/lib/actions/modules";
 
 interface Params {
   slug: string;
@@ -32,13 +33,21 @@ export default async function OrganizationLayout({
     slug: resolvedParams.slug,
   });
 
+  // Get modules for this organization
+  const modulesResult = await getOrganizationModules(organization.id);
+  const modules = "data" in modulesResult ? modulesResult.data : [];
+
   // Get sidebar state from cookies for persistent state
   const cookieStore = await cookies();
   const defaultOpen = cookieStore.get("sidebar_state")?.value !== "false";
 
   return (
     <SidebarProvider defaultOpen={defaultOpen}>
-      <OrgSidebar organization={organization} user={session.user} />
+      <OrgSidebar
+        organization={organization}
+        user={session.user}
+        modules={modules || []}
+      />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
           <SidebarTrigger className="-ml-1" />

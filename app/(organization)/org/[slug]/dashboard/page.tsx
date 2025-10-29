@@ -10,23 +10,19 @@ interface OrgDashboardProps {
 }
 
 export default async function OrgDashboard({ params }: OrgDashboardProps) {
-  // Await params (Next.js 15 requirement)
+  // Layout already validates membership via requireOrgMember
+  // Fetch data needed for this specific page
   const { slug } = await params;
 
-  // Fetch full organization data
   const organization = await auth.api.getFullOrganization({
-    query: {
-      organizationSlug: slug,
-    },
+    query: { organizationSlug: slug },
     headers: await headers(),
   });
 
-  // Fetch active member data to get current user's role
   const activeMember = await auth.api.getActiveMember({
     headers: await headers(),
   });
 
-  // Calculate members count
   const membersCount = organization?.members?.length || 0;
 
   // Mock data for quick stats (to be replaced with real data later)
