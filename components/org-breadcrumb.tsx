@@ -16,17 +16,24 @@ interface OrgBreadcrumbProps {
   organizationName: string;
 }
 
-export function OrgBreadcrumb({ organizationSlug, organizationName }: OrgBreadcrumbProps) {
+export function OrgBreadcrumb({
+  organizationSlug,
+  organizationName,
+}: OrgBreadcrumbProps) {
   const pathname = usePathname();
-  
+
   // Parse the pathname to create breadcrumb segments
   const segments = pathname
     .split("/")
-    .filter((segment) => segment && segment !== "org" && segment !== organizationSlug);
+    .filter(
+      (segment) => segment && segment !== "org" && segment !== organizationSlug
+    );
 
   // If we're on the dashboard, don't show it as a separate breadcrumb
   // since the organization name already links to dashboard
-  const filteredSegments = segments.filter(segment => segment !== "dashboard");
+  const filteredSegments = segments.filter(
+    (segment) => segment !== "dashboard"
+  );
 
   const breadcrumbItems = [
     {
@@ -35,11 +42,21 @@ export function OrgBreadcrumb({ organizationSlug, organizationName }: OrgBreadcr
       id: "org-home",
     },
     ...filteredSegments.map((segment, index) => {
-      const href = `/org/${organizationSlug}/${filteredSegments.slice(0, index + 1).join("/")}`;
-      const label = segment
-        .split("-")
-        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(" ");
+      const href = `/org/${organizationSlug}/${filteredSegments
+        .slice(0, index + 1)
+        .join("/")}`;
+
+      // Custom label mapping for specific routes
+      let label = segment;
+      if (segment === "teams") {
+        label = "Offices";
+      } else {
+        label = segment
+          .split("-")
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(" ");
+      }
+
       return { label, href, id: `segment-${index}` };
     }),
   ];

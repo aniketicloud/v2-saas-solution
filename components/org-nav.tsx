@@ -31,7 +31,7 @@ export function OrgNav({ organization, user }: OrgNavProps) {
       href: `${baseUrl}/settings`,
     },
     {
-      title: "Teams",
+      title: "Offices",
       href: `${baseUrl}/teams`,
     },
   ];

@@ -64,6 +64,12 @@ export default async function AdminOrganizationDetailPage({
         action={
           <div className="flex gap-2">
             <Button variant="outline" asChild>
+              <Link href={`/org/${organization.slug}/dashboard`}>
+                <Building2 className="mr-2 h-4 w-4" />
+                Go to Organization
+              </Link>
+            </Button>
+            <Button variant="outline" asChild>
               <Link href={`/admin/organizations/${id}/edit`}>
                 <Pencil className="mr-2 h-4 w-4" />
                 Edit
@@ -147,13 +153,17 @@ export default async function AdminOrganizationDetailPage({
             <div className="flex items-center justify-between rounded-lg border p-4">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">
-                  Teams
+                  Offices
                 </p>
                 <p className="mt-1 text-2xl font-bold">
                   {organization.teams?.length || 0}
                 </p>
               </div>
-              <Badge variant="outline">Enabled</Badge>
+              <Button variant="outline" size="sm" asChild>
+                <Link href={`/org/${organization.slug}/teams`}>
+                  View Offices
+                </Link>
+              </Button>
             </div>
             <div className="flex items-center justify-between rounded-lg border p-4">
               <div>
@@ -186,6 +196,7 @@ export default async function AdminOrganizationDetailPage({
             <MembersTable
               members={members}
               organizationId={organization.id}
+              organizationSlug={organization.slug}
               canEdit={true} // Admin can always edit
             />
           ) : (

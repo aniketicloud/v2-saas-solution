@@ -73,7 +73,11 @@ const iconMap: Record<string, any> = {
   UsersRound,
 };
 
-export function OrgSidebar({ organization, user, modules = [] }: OrgSidebarProps) {
+export function OrgSidebar({
+  organization,
+  user,
+  modules = [],
+}: OrgSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const baseUrl = `/org/${organization.slug}`;
@@ -95,7 +99,7 @@ export function OrgSidebar({ organization, user, modules = [] }: OrgSidebarProps
       icon: Shield,
     },
     {
-      title: "Teams",
+      title: "Offices",
       url: `${baseUrl}/teams`,
       icon: UsersRound,
     },
