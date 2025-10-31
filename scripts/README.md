@@ -18,8 +18,6 @@ pnpm admin:make <email>
 pnpm admin:make john@company.com
 ```
 
-**Documentation**: See [Admin User Management](../docs/ADMIN_USER_MANAGEMENT.md)
-
 **Requirements**:
 - User must already exist in database
 - Requires database access
@@ -117,6 +115,29 @@ npx tsx scripts/test-permissions.ts
 - Verify permission system setup
 - Debug permission issues
 - See which permissions are granted to members
+
+---
+
+### 🔧 update-predefined-roles-flags.ts
+
+**Purpose**: Update existing predefined roles to set the `isPredefined` flag
+
+**Usage**:
+```bash
+npx tsx scripts/update-predefined-roles-flags.ts
+```
+
+**When to use**:
+- After upgrading to schema that includes `isPredefined` field
+- When existing Admin, Editor, Viewer roles need to be marked as predefined
+- To ensure proper role management UI behavior
+
+**What it does**:
+1. Finds all custom roles with names: Admin, Editor, or Viewer
+2. Updates their `isPredefined` flag to `true`
+3. Displays summary of updated roles
+
+**Note**: This is a one-time migration script for existing databases.
 
 ---
 
